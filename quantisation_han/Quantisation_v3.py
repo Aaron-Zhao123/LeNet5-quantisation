@@ -25,6 +25,7 @@ learning_rate = 0.001
 training_epochs = 10
 batch_size = 100
 display_step = 1
+Number_of_cluster = 4
 
 # Network Parameters
 IMAGE_SIZE = 28
@@ -38,6 +39,7 @@ n_classes = 10 # MNIST total classes (0-9 digits)
 INITAL = 0
 # FILE_NAME = "pcov96pfc96.pkl"
 FILE_NAME = '/Users/aaron/Projects/Mphil_project/tmp_asyn_prune/pcov91pcov91pfc995pfc91.pkl'
+# FILE_NAME = '/home/ubuntu/LENet5-431K/tmp/pcov91pcov91pfc995pfc91.pkl'
 pruning_number = 10
 if (INITAL == 0):
     with open(FILE_NAME,'rb') as f:
@@ -215,7 +217,7 @@ def main(argv = None):
                 # poses = [np.argwhere(weight_org == x) for x in weight_val]
                 data = np.expand_dims(weight_val, axis = 1)
                 # use kmeans to cluster
-                kmeans = KMeans(n_clusters=8, random_state=0).fit(data)
+                kmeans = KMeans(n_clusters= Number_of_cluster, random_state=0).fit(data)
                 centroid =  kmeans.cluster_centers_
                 # add centroid value
                 centroids[key] = centroid
