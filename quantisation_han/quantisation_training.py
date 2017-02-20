@@ -78,7 +78,7 @@ def compute_weights(weights_index, centroids_var):
         print(weights_index[key])
         for i in range(1, Number_of_cluster + 1):
             if (i == 1):
-                weights[key] = tf.to_float(tf.equal(weights_index[key], 1)) * centroids_var[key][0]
+                weights[key] = tf.cast(tf.equal(weights_index[key], 1),tf.float32) * centroids_var[key][0]
             else:
                 weights[key] = weights[key] + tf.to_float(tf.equal(weights_index[key], i)) * centroids_var[key][i-1]
     return weights
