@@ -129,8 +129,9 @@ def main(argv = None):
         n_classes = 10 # MNIST total classes (0-9 digits)
         INITAL = 0
         # FILE_NAME = "pcov96pfc96.pkl"
-        FILE_NAME = '/Users/aaron/Projects/Mphil_project/tmp_asyn_prune/pcov91pcov91pfc995pfc91.pkl'
+        # FILE_NAME = '/Users/aaron/Projects/Mphil_project/tmp_asyn_prune/pcov91pcov91pfc995pfc91.pkl'
         # FILE_NAME = '/home/ubuntu/LENet5-431K/tmp/pcov91pcov91pfc995pfc91.pkl'
+        FILE_NAME = 'pruned_model.pkl'
         pruning_number = 10
         if (INITAL == 0):
             with open(FILE_NAME,'rb') as f:
