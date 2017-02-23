@@ -16,61 +16,7 @@ import pickle
 class Usage(Exception):
     def __init__ (self,msg):
         self.msg = msg
-
-# Parameters
-learning_rate = 0.001
-training_epochs = 10
-batch_size = 100
-display_step = 1
-
-# Network Parameters
-Number_of_cluster= 4
-IMAGE_SIZE = 28
-NUM_CHANNELS = 1
-NUM_LABELS = 10
-
-n_hidden_1 = 300# 1st layer number of features
-n_hidden_2 = 100# 2nd layer number of features
-n_input = 784 # MNIST data input (img shape: 28*28)
-n_classes = 10 # MNIST total classes (0-9 digits)
-
-# sets the threshold
-prune_threshold_cov = 0.08
-prune_threshold_fc = 1
-# Frequency in terms of number of training iterations
-prune_freq = 100
-ENABLE_PRUNING = 0
-
-
-with open('quantize_info.pkl','rb') as f:
-    (weights_orgs, biases_orgs, cluster_index, centroids) = pickle.load(f)
-
-centroids_var = {
-    'cov1': tf.Variable(centroids['cov1']),
-    'cov2': tf.Variable(centroids['cov2']),
-    'fc1': tf.Variable(centroids['fc1']),
-    'fc2': tf.Variable(centroids['fc2'])
-}
-# weights_index = {
-#     'cov1': tf.Variable(cluster_index['cov1']),
-#     'cov2': tf.Variable(cluster_index['cov2']),
-#     'fc1': tf.Variable(cluster_index['fc1']),
-#     'fc2': tf.Variable(cluster_index['fc2'])
-# }
-weights_index = {
-    'cov1': tf.constant(cluster_index['cov1'],tf.float32),
-    'cov2': tf.constant(cluster_index['cov2'],tf.float32),
-    'fc1': tf.constant(cluster_index['fc1'],tf.float32),
-    'fc2': tf.constant(cluster_index['fc2'],tf.float32)
-}
-biases = {
-    'cov1': tf.Variable(biases_orgs['cov1']),
-    'cov2': tf.Variable(biases_orgs['cov2']),
-    'fc1': tf.Variable(biases_orgs['fc1']),
-    'fc2': tf.Variable(biases_orgs['fc2'])
-}
-
-def compute_weights(weights_index, centroids_var):
+def compute_weights(weights_index, centroids_var, Number_of_cluster):
     keys = ['cov1','cov2','fc1','fc2']
     weights = {}
     for key in keys:
@@ -203,10 +149,68 @@ def main(argv = None):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:],'h')
-
+            Number_of_cluster= 4
+            opts = argv
+            for item in opts:
+                opt = item[0]
+                val = item[1]
+                if ('-cluster'):
+                    Number_of_cluster = val
         except getopt.error, msg:
             raise Usage(msg)
+
+        # Parameters
+        learning_rate = 0.001
+        training_epochs = 10
+        batch_size = 100
+        display_step = 1
+
+        # Network Parameters
+        IMAGE_SIZE = 28
+        NUM_CHANNELS = 1
+        NUM_LABELS = 10
+
+        n_hidden_1 = 300# 1st layer number of features
+        n_hidden_2 = 100# 2nd layer number of features
+        n_input = 784 # MNIST data input (img shape: 28*28)
+        n_classes = 10 # MNIST total classes (0-9 digits)
+
+        # sets the threshold
+        prune_threshold_cov = 0.08
+        prune_threshold_fc = 1
+        # Frequency in terms of number of training iterations
+        prune_freq = 100
+        ENABLE_PRUNING = 0
+
+
+        with open('quantize_info'+str(Number_of_cluster)+'.pkl','rb') as f:
+            (weights_orgs, biases_orgs, cluster_index, centroids) = pickle.load(f)
+
+        centroids_var = {
+            'cov1': tf.Variable(centroids['cov1']),
+            'cov2': tf.Variable(centroids['cov2']),
+            'fc1': tf.Variable(centroids['fc1']),
+            'fc2': tf.Variable(centroids['fc2'])
+        }
+        # weights_index = {
+        #     'cov1': tf.Variable(cluster_index['cov1']),
+        #     'cov2': tf.Variable(cluster_index['cov2']),
+        #     'fc1': tf.Variable(cluster_index['fc1']),
+        #     'fc2': tf.Variable(cluster_index['fc2'])
+        # }
+        weights_index = {
+            'cov1': tf.constant(cluster_index['cov1'],tf.float32),
+            'cov2': tf.constant(cluster_index['cov2'],tf.float32),
+            'fc1': tf.constant(cluster_index['fc1'],tf.float32),
+            'fc2': tf.constant(cluster_index['fc2'],tf.float32)
+        }
+        biases = {
+            'cov1': tf.Variable(biases_orgs['cov1']),
+            'cov2': tf.Variable(biases_orgs['cov2']),
+            'fc1': tf.Variable(biases_orgs['fc1']),
+            'fc2': tf.Variable(biases_orgs['fc2'])
+        }
+
 
         # obtain all weight masks
         with open('mask.pkl','rb') as f:
@@ -220,7 +224,7 @@ def main(argv = None):
 
         x_image = tf.reshape(x,[-1,28,28,1])
         # Construct model
-        weights = compute_weights(weights_index, centroids_var)
+        weights = compute_weights(weights_index, centroids_var, Number_of_cluster)
         pred, pool = conv_network(x_image, weights, biases)
 
         # Define loss and optimizer
@@ -248,6 +252,7 @@ def main(argv = None):
             sess.run(init)
             keys = ['cov1','cov2','fc1','fc2']
 
+            pre_train_acc =  accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
 
             training_cnt = 0
             train_accuracy = 0
@@ -269,12 +274,13 @@ def main(argv = None):
                     accuracy_mean = np.mean(accuracy_list)
                     # print(weights['fc1'].eval().flatten())
                     # print(centroids_var['cov1'].eval())
-                    print(c,accuracy_mean)
+                    if (i % 100 == 0):
+                        print(c,accuracy_mean)
                     if (accuracy_mean > 0.999):
                         accuracy_mean = 0
                         accuracy_list = np.zeros(20)
                         print('Training ends because accuracy is high')
-                        with open('weights_log/weights_quan'+'.pkl','wb') as f:
+                        with open('weights_log/weights_quan'+ str(Number_of_cluster)+'.pkl','wb') as f:
                             pickle.dump((
                                 weights['cov1'].eval(),
                                 weights['cov2'].eval(),
@@ -297,7 +303,7 @@ def main(argv = None):
                 print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
             print('Training ends because timeout, but still save the model')
-            with open('weights_log/weights_quan'+'.pkl','wb') as f:
+            with open('weights_log/weights_quan'+ str(Number_of_cluster)+'.pkl','wb') as f:
                 pickle.dump((
                     weights['cov1'].eval(),
                     weights['cov2'].eval(),
@@ -309,10 +315,10 @@ def main(argv = None):
                     biases['fc2'].eval(),
                 ),f)
             # Test model
-            correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
             # Calculate accuracy
-            accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-            print("Test Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
+            after_train_test_acc = accuracy.eval({x: mnist.test.images, y:mnist.test.labels})
+            print("Test Accuracy:", after_train_test_acc)
+            return (pre_train_acc, after_train_test_acc)
 
     except Usage, err:
         print >> sys.stderr, err.msg

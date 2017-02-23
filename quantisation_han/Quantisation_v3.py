@@ -20,66 +20,6 @@ class Usage(Exception):
     def __init__ (self,msg):
         self.msg = msg
 
-# Parameters
-learning_rate = 0.001
-training_epochs = 10
-batch_size = 100
-display_step = 1
-Number_of_cluster = 4
-
-# Network Parameters
-IMAGE_SIZE = 28
-NUM_CHANNELS = 1
-NUM_LABELS = 10
-
-n_hidden_1 = 300# 1st layer number of features
-n_hidden_2 = 100# 2nd layer number of features
-n_input = 784 # MNIST data input (img shape: 28*28)
-n_classes = 10 # MNIST total classes (0-9 digits)
-INITAL = 0
-# FILE_NAME = "pcov96pfc96.pkl"
-# FILE_NAME = '/Users/aaron/Projects/Mphil_project/tmp_asyn_prune/pcov91pcov91pfc995pfc91.pkl'
-FILE_NAME = '/home/ubuntu/LENet5-431K/tmp/pcov91pcov91pfc995pfc91.pkl'
-pruning_number = 10
-if (INITAL == 0):
-    with open(FILE_NAME,'rb') as f:
-        wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
-    weights = {
-        # 5x5 conv, 1 input, 32 outputs
-        'cov1': tf.Variable(wc1),
-        # 5x5 conv, 32 inputs, 64 outputs
-        'cov2': tf.Variable(wc2),
-        # fully connected, 7*7*64 inputs, 1024 outputs
-        'fc1': tf.Variable(wd1),
-        # 1024 inputs, 10 outputs (class prediction)
-        'fc2': tf.Variable(out)
-    }
-
-    biases = {
-        'cov1': tf.Variable(bc1),
-        'cov2': tf.Variable(bc2),
-        'fc1': tf.Variable(bd1),
-        'fc2': tf.Variable(bout)
-    }
-else:
-    weights = {
-        'cov1': tf.Variable(tf.truncated_normal([5, 5, NUM_CHANNELS, 32], stddev=0.1)),
-        'cov2': tf.Variable(tf.truncated_normal([5, 5, 32, 64], stddev=0.1)),
-        'fc1': tf.Variable(tf.random_normal([IMAGE_SIZE // 4 * IMAGE_SIZE // 4 * 64, 512])),
-        'fc2': tf.Variable(tf.random_normal([512, NUM_LABELS]))
-    }
-    biases = {
-        'cov1': tf.Variable(tf.random_normal([32])),
-        'cov2': tf.Variable(tf.random_normal([64])),
-        'fc1': tf.Variable(tf.random_normal([512])),
-        'fc2': tf.Variable(tf.random_normal([10]))
-    }
-    weights_index = {
-        'cov1': np.zeros([5, 5, NUM_CHANNELS, 32]),
-        'cov2': np.zeros([5, 5, 32, 64]),
-        'fc1': np.zeros([IMAGE_SIZE // 4 * IMAGE_SIZE // 4 * 64, 512]),
-        'fc2': np.zeros([512, NUM_LABELS])
-    }
 # Create model
 def conv_network(x, weights, biases):
     conv = tf.nn.conv2d(x,
@@ -161,9 +101,76 @@ def main(argv = None):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:],'h')
+            # opts, args = getopt.getopt(argv[1:],'h')
+            Number_of_cluster = 4
+            opts = argv
+            for item in opts:
+                opt = item[0]
+                val = item[1]
+                if ('-cluster'):
+                    Number_of_cluster = val
         except getopt.error, msg:
             raise Usage(msg)
+        print("Number of cluster :{}".format(Number_of_cluster))
+        # Parameters
+        learning_rate = 0.001
+        training_epochs = 10
+        batch_size = 100
+        display_step = 1
+
+        # Network Parameters
+        IMAGE_SIZE = 28
+        NUM_CHANNELS = 1
+        NUM_LABELS = 10
+
+        n_hidden_1 = 300# 1st layer number of features
+        n_hidden_2 = 100# 2nd layer number of features
+        n_input = 784 # MNIST data input (img shape: 28*28)
+        n_classes = 10 # MNIST total classes (0-9 digits)
+        INITAL = 0
+        # FILE_NAME = "pcov96pfc96.pkl"
+        FILE_NAME = '/Users/aaron/Projects/Mphil_project/tmp_asyn_prune/pcov91pcov91pfc995pfc91.pkl'
+        # FILE_NAME = '/home/ubuntu/LENet5-431K/tmp/pcov91pcov91pfc995pfc91.pkl'
+        pruning_number = 10
+        if (INITAL == 0):
+            with open(FILE_NAME,'rb') as f:
+                wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
+            weights = {
+                # 5x5 conv, 1 input, 32 outputs
+                'cov1': tf.Variable(wc1),
+                # 5x5 conv, 32 inputs, 64 outputs
+                'cov2': tf.Variable(wc2),
+                # fully connected, 7*7*64 inputs, 1024 outputs
+                'fc1': tf.Variable(wd1),
+                # 1024 inputs, 10 outputs (class prediction)
+                'fc2': tf.Variable(out)
+            }
+
+            biases = {
+                'cov1': tf.Variable(bc1),
+                'cov2': tf.Variable(bc2),
+                'fc1': tf.Variable(bd1),
+                'fc2': tf.Variable(bout)
+            }
+        else:
+            weights = {
+                'cov1': tf.Variable(tf.truncated_normal([5, 5, NUM_CHANNELS, 32], stddev=0.1)),
+                'cov2': tf.Variable(tf.truncated_normal([5, 5, 32, 64], stddev=0.1)),
+                'fc1': tf.Variable(tf.random_normal([IMAGE_SIZE // 4 * IMAGE_SIZE // 4 * 64, 512])),
+                'fc2': tf.Variable(tf.random_normal([512, NUM_LABELS]))
+            }
+            biases = {
+                'cov1': tf.Variable(tf.random_normal([32])),
+                'cov2': tf.Variable(tf.random_normal([64])),
+                'fc1': tf.Variable(tf.random_normal([512])),
+                'fc2': tf.Variable(tf.random_normal([10]))
+            }
+            weights_index = {
+                'cov1': np.zeros([5, 5, NUM_CHANNELS, 32]),
+                'cov2': np.zeros([5, 5, 32, 64]),
+                'fc1': np.zeros([IMAGE_SIZE // 4 * IMAGE_SIZE // 4 * 64, 512]),
+                'fc2': np.zeros([512, NUM_LABELS])
+            }
 
         # obtain all weight masks
         # tf Graph input
@@ -232,11 +239,8 @@ def main(argv = None):
                 weights_orgs[key] = weights[key].eval()
                 biases_orgs[key] = biases[key].eval()
             prune_info(weights,0)
-            with open('quantize_info.pkl','wb') as f:
+            with open('quantize_info'+str(Number_of_cluster)+'.pkl','wb') as f:
                 pickle.dump((weights_orgs, biases_orgs, cluster_index,centroids),f)
-
-
-
 
 
         # KMeans(init='k-means++', n_clusters=16, n_init=10).fit(weights_val['cov1'])
