@@ -17,12 +17,12 @@ def main():
         acc_list.append(acc)
         print (acc)
         count = count + 1
-        if (acc >= 0.9936 or retrain >=3):
-            acc_list.append(acc)
-            retrain = 0
-            count = count + 1
-        else:
-            retrain += 1
+        # if (acc >= 0.9936 or retrain >=3):
+        #     acc_list.append(acc)
+        #     retrain = 0
+        #     count = count + 1
+        # else:
+        #     retrain += 1
     print('accuracy summary: {}'.format(acc_list))
     print(pre_acc_list)
     print(acc_list)
