@@ -253,7 +253,7 @@ def main(argv = None):
             keys = ['cov1','cov2','fc1','fc2']
 
             pre_train_acc =  accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
-            return(pre_train_acc, 0)
+            # return(pre_train_acc, 0)
 
             training_cnt = 0
             train_accuracy = 0
