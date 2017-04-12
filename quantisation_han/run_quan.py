@@ -4,7 +4,7 @@ import Quantisation_v3
 def main():
     acc_list = []
     pre_acc_list = []
-    clusters = [2,4,8,16,32]
+    clusters = [2,4,8,16,32,64]
     count = 0
     retrain = 0
     for cluster in clusters:

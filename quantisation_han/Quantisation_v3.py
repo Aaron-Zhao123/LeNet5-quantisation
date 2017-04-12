@@ -128,9 +128,6 @@ def main(argv = None):
         n_input = 784 # MNIST data input (img shape: 28*28)
         n_classes = 10 # MNIST total classes (0-9 digits)
         INITAL = 0
-        # FILE_NAME = "pcov96pfc96.pkl"
-        # FILE_NAME = '/Users/aaron/Projects/Mphil_project/tmp_asyn_prune/pcov91pcov91pfc995pfc91.pkl'
-        # FILE_NAME = '/home/ubuntu/LENet5-431K/tmp/pcov91pcov91pfc995pfc91.pkl'
         FILE_NAME = 'pruned_model.pkl'
         pruning_number = 10
         if (INITAL == 0):
@@ -204,13 +201,6 @@ def main(argv = None):
         # Launch the graph
         with tf.Session() as sess:
             sess.run(init)
-            # restore model if exists
-            # if (os.path.isfile("tmp_20160118/model.meta")):
-            #     op = tf.train.import_meta_graph("tmp_20160118/model.meta")
-            #     op.restore(sess,tf.train.latest_checkpoint('tmp_20160118/'))
-            #     print ("model found and restored")
-
-            # print(weights['fc1'].eval())
             keys = ['cov1','cov2','fc1','fc2']
             weights_val = {}
             centroids = {}
@@ -222,7 +212,6 @@ def main(argv = None):
                 weight_org = weights[key].eval()
                 weight= weight_org.flatten()
                 weight_val = weight[weight != 0]
-                # poses = [np.argwhere(weight_org == x) for x in weight_val]
                 data = np.expand_dims(weight_val, axis = 1)
                 # use kmeans to cluster
                 kmeans = KMeans(n_clusters= Number_of_cluster, random_state=0).fit(data)
@@ -244,7 +233,6 @@ def main(argv = None):
                 pickle.dump((weights_orgs, biases_orgs, cluster_index,centroids),f)
 
 
-        # KMeans(init='k-means++', n_clusters=16, n_init=10).fit(weights_val['cov1'])
 
     except Usage, err:
         print >> sys.stderr, err.msg

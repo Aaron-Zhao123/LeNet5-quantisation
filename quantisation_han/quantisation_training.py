@@ -161,7 +161,7 @@ def main(argv = None):
 
         # Parameters
         learning_rate = 0.001
-        training_epochs = 10
+        training_epochs = 300
         batch_size = 100
         display_step = 1
 
@@ -253,6 +253,7 @@ def main(argv = None):
             keys = ['cov1','cov2','fc1','fc2']
 
             pre_train_acc =  accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
+            return(pre_train_acc, 0)
 
             training_cnt = 0
             train_accuracy = 0
@@ -294,7 +295,7 @@ def main(argv = None):
                         print("saving model ...")
                         test_acc =  accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
                         print("test acc is {}".format(test_acc))
-                        if (test_acc > 0.99):
+                        if (test_acc > 0.9936):
                             print("Post quantisation retrain done")
                             break
                     # Compute average loss
