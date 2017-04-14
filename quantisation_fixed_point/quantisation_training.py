@@ -18,8 +18,8 @@ class Usage(Exception):
         self.msg = msg
 
 # Parameters
-learning_rate = 0.001
-training_epochs = 10
+learning_rate =  1e-4
+training_epochs = 1
 batch_size = 100
 display_step = 1
 
@@ -41,8 +41,8 @@ prune_freq = 100
 ENABLE_PRUNING = 0
 
 
-def initialize_variables():
-    with open('weights_log/pcov96pfc96.pkl','rb') as f:
+def initialize_variables(weights_file_name):
+    with open(weights_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
         # weights, biases = pickle.load(f)
     weights_val = {
@@ -57,7 +57,6 @@ def initialize_variables():
         'fc1': bd1,
         'fc2': bout
     }
-    # (weights, biases) = compute_weights_4bits(weights_val, biase_val)
     weights = weights_val
     biases = biase_val
     weights = {
@@ -113,18 +112,6 @@ def quantisation_4bits_np(matrix):
     qn8 = np.to_float(matrix < -1.75) * (-1.75)
     return (q1+qn1+q2+qn2+q3+qn3+q4+qn4+q5+qn5+q6+qn6+q7+qn7+q8+qn8)
 
-# def compute_weights_4bits(weights, biases):
-#     keys = ['cov1','cov2','fc1','fc2']
-#     # 4 bit. 1 bit sign, 1 bit integer, 2 bits fractional 00(0)-11(0.5+0.25)
-#     for key in keys:
-#         # pass
-#         # weights[key] = tf.to_float(tf.multiply(tf.to_float(tf.less_equal(weights[key], 0.25)), tf.to_float(tf.greater(weights[key], 0)))) * 0.
-#         # biases[key] = tf.to_float(tf.multiply(tf.to_float(tf.less_equal(biases[key], 0.25)), tf.to_float(tf.greater(biases[key], 0)))) * 0.
-#         # biases[key] = tf.to_float(tf.logical_and(biases[key]<= 0.25, biases[key]> 0)) * 0.
-#         weights[key] = quantisation_4bits(weights[key])
-#         biases[key] = quantisation_4bits(biases[key])
-#     return (weights, biases)
-#
 
 def compute_weights_4bits(weights, biases):
     keys = ['cov1','cov2','fc1','fc2']
@@ -132,13 +119,17 @@ def compute_weights_4bits(weights, biases):
     for key in keys:
         weights[key] = tf.floordiv(weights[key],0.125) * 0.125
         biases[key] = tf.floordiv(biases[key],0.125) * 0.125
-        # weights[key] = weights[key] - tf.truncatemod(weights[key],0.125)
-        # biases[key] = biases[key] - tf.truncatemod(biases[key],0.125)
-        # biases[key] = tf.div(biases[key],0.125) * 0.125
     return (weights, biases)
 
-def compute_weights_6bits(weights, biases):
-    pass
+def compute_weights_nbits(weights, biases, frac_bits):
+    keys = ['cov1','cov2','fc1','fc2']
+    # two defualt bits: 1 bit sign, 1 bit integer
+    # 4 bit. 1 bit sign, 1 bit integer, 2 bits fractional 00(0)-11(0.5+0.25)
+    interval = 0.5 / float(frac_bits)
+    for key in keys:
+        weights[key] = tf.floordiv(weights[key], interval) * interval
+        biases[key] = tf.floordiv(biases[key], interval) * interval
+    return (weights, biases)
 
 def conv_network(x, weights, biases):
     conv = tf.nn.conv2d(x,
@@ -235,13 +226,20 @@ def main(argv = None):
         argv = sys.argv
     try:
         try:
-            opts, args = getopt.getopt(argv[1:],'h')
-
+            opts = argv
+            for item, val in opts:
+                if (item == '-quantisation_bits'):
+                    q_bits = val
+                if (item == '-parent_dir'):
+                    parent_dir = val
+                if (item == '-base_name'):
+                    base_name = val
         except getopt.error, msg:
             raise Usage(msg)
 
         # obtain all weight masks
-        with open('mask.pkl','rb') as f:
+        mask_dir = parent_dir + 'masks/' + base_name + '.pkl'
+        with open(mask_dir,'rb') as f:
             weights_mask,biases_mask = pickle.load(f)
 
         mnist = input_data.read_data_sets("MNIST.data/", one_hot = True)
@@ -251,8 +249,10 @@ def main(argv = None):
         keys = ['cov1','cov2','fc1','fc2']
 
         x_image = tf.reshape(x,[-1,28,28,1])
-        weights, biases = initialize_variables()
-        weights,biases = compute_weights_4bits(weights, biases)
+
+        weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
+        weights, biases = initialize_variables(weights_dir)
+        weights,biases = compute_weights_nbits(weights, biases, q_bits)
         # Construct model
         pred, pool = conv_network(x_image, weights, biases)
 
@@ -263,17 +263,13 @@ def main(argv = None):
         correct_prediction = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-        merged = tf.merge_all_summaries()
-        saver = tf.train.Saver()
-
         org_grads = trainer.compute_gradients(cost)
 
         org_grads = [(ClipIfNotNone(grad), var) for grad, var in org_grads]
         new_grads = mask_gradients(org_grads, weights_mask, weights, biases_mask, biases)
-        # update_weights(new_grads)
-
         train_step = trainer.apply_gradients(new_grads)
         init = tf.initialize_all_variables()
+
         # Launch the graph
         with tf.Session() as sess:
             sess.run(init)
@@ -283,7 +279,8 @@ def main(argv = None):
             train_accuracy = 0
             accuracy_list = np.zeros(20)
 
-            print("Directly after pruning, Test Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
+            pre_train_acc = accuracy.eval({x:mnist.test.images, y: mnist.test.labels})
+            print("Directly before pruning, Test Accuracy:", pre_train_acc)
             print(70*'-')
             print(weights['fc1'].eval())
             print(70*'-')
@@ -302,29 +299,34 @@ def main(argv = None):
                     training_cnt = training_cnt + 1
                     accuracy_list = np.concatenate((np.array([train_accuracy]),accuracy_list[0:19]))
                     accuracy_mean = np.mean(accuracy_list)
-
-                    print(c,accuracy_mean)
-                    if (accuracy_mean > 0.999):
-                        print('Training ends because accuracy is high')
-                        with open('weights_log/quanfp'+'.pkl','wb') as f:
-                            pickle.dump((
-                                weights['cov1'].eval(),
-                                weights['cov2'].eval(),
-                                weights['fc1'].eval(),
-                                weights['fc2'].eval(),
-                                biases['cov1'].eval(),
-                                biases['cov2'].eval(),
-                                biases['fc1'].eval(),
-                                biases['fc2'].eval(),
-                            ),f)
-                        print("saving model ...")
+                    if (i % 1000 == 0):
+                        print('cost and acc:',c,accuracy_mean)
+                    if (accuracy_mean > 0.99):
+                        print('Try quantize {} frac bits'.format(q_bits))
+                        test_acc = accuracy.eval({  x:mnist.test.images,
+                                                    y: mnist.test.labels})
+                        if (test_acc > 0.936):
+                            print('Training ends because accuracy is high')
+                            with open(parent_dir+'weights/'+ 'quanfp' +'.pkl','wb') as f:
+                                pickle.dump((
+                                    weights['cov1'].eval(),
+                                    weights['cov2'].eval(),
+                                    weights['fc1'].eval(),
+                                    weights['fc2'].eval(),
+                                    biases['cov1'].eval(),
+                                    biases['cov2'].eval(),
+                                    biases['fc1'].eval(),
+                                    biases['fc2'].eval(),
+                                ),f)
+                            print("saving model ...")
+                            return (pre_train_acc, test_acc)
                     # Compute average loss
                     avg_cost += c / total_batch
                 # Display logs per epoch step
                 print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
             print('Training ends because timeout, but still save the model')
-            with open('weights_log/quanfp'+'.pkl','wb') as f:
+            with open('weights/quanfp'+'.pkl','wb') as f:
                 pickle.dump((
                     weights['cov1'].eval(),
                     weights['cov2'].eval(),
@@ -335,11 +337,9 @@ def main(argv = None):
                     biases['fc1'].eval(),
                     biases['fc2'].eval(),
                 ),f)
-            # Test model
-            correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
-            # Calculate accuracy
-            accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-            print("Test Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
+            test_acc = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
+            print("Test Accuracy:", test_acc)
+            return (pre_train_acc, test_acc)
 
     except Usage, err:
         print >> sys.stderr, err.msg
