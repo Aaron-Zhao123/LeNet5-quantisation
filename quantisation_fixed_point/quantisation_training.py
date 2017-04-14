@@ -252,7 +252,7 @@ def main(argv = None):
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
         weights, biases = initialize_variables(weights_dir)
-        weights,biases = compute_weights_nbits(weights, biases, q_bits)
+        # weights,biases = compute_weights_nbits(weights, biases, q_bits)
         # Construct model
         pred, pool = conv_network(x_image, weights, biases)
 
