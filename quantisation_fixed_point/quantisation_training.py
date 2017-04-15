@@ -307,7 +307,7 @@ def main(argv = None):
                                                     y: mnist.test.labels})
                         if (test_acc > 0.9936):
                             print('Training ends because accuracy is high')
-                            with open(parent_dir+'weights/'+ 'quanfp' +'.pkl','wb') as f:
+                            with open(parent_dir+'weights/'+ 'quanfp' + str(q_bits) +'.pkl','wb') as f:
                                 pickle.dump((
                                     weights['cov1'].eval(),
                                     weights['cov2'].eval(),
@@ -326,7 +326,7 @@ def main(argv = None):
                 print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
             print('Training ends because timeout, but still save the model')
-            with open('weights/quanfp'+'.pkl','wb') as f:
+            with open('weights/quanfp'+ str(q_bits) +'.pkl','wb') as f:
                 pickle.dump((
                     weights['cov1'].eval(),
                     weights['cov2'].eval(),
