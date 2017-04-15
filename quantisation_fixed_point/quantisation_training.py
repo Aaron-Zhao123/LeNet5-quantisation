@@ -305,7 +305,7 @@ def main(argv = None):
                         print('Try quantize {} frac bits'.format(q_bits))
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
-                        if (test_acc > 0.936):
+                        if (test_acc > 0.9936):
                             print('Training ends because accuracy is high')
                             with open(parent_dir+'weights/'+ 'quanfp' +'.pkl','wb') as f:
                                 pickle.dump((

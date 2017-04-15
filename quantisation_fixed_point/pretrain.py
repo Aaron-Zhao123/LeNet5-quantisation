@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import input_data
 import pickle
+import scipy.io as sio
 np.set_printoptions(precision=128)
 # open_file_name = 'weights_log/weights10.pkl'
 # open_file_name = 'weights_log/weights_quan'+'.pkl'
@@ -9,8 +10,8 @@ np.set_printoptions(precision=128)
 # open_file_name = 'weights_log/pcov96pfc96'+'.pkl'
 # open_file_name = 'weights_log/pcov96pfc96.pkl'
 # open_file_name = 'weights_log/quanfp.pkl'
-open_file_name = 'weights/quanfp.pkl'
 open_file_name = 'weights/weight0.pkl'
+open_file_name = 'weights/quanfp4.pkl'
 Test = True;
 # Test = False;
 MASK_GEN = True
@@ -235,8 +236,19 @@ print("test accuracy %.5f"%accuracy.eval(feed_dict={
 if (MASK_GEN == True):
     print("generating the mask pickle file")
     mask_gen()
-if (Test == False):
     print("store weights and biases")
+    sio.savemat("weights.mat", (
+        {   'wconv1':   W_conv1.eval(),
+            'wconv2':   W_conv2.eval(),
+            'wfc1':     W_fc1.eval(),
+            'wfc2':     W_fc2.eval(),
+            'bconv1':   b_conv1.eval(),
+            'bconv2':   b_conv2.eval(),
+            'bfc1':     b_fc1.eval(),
+            'bfc2':     b_fc2.eval()
+    ))
+
+if (Test == False):
     with open('weights.pkl','wb') as f:
         pickle.dump((
             W_conv1.eval(),
