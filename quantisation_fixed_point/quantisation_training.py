@@ -302,9 +302,9 @@ def main(argv = None):
                     if (i % 1000 == 0):
                         print('cost and acc:',c,accuracy_mean)
                     if (accuracy_mean > 0.99):
-                        print('Try quantize {} frac bits'.format(q_bits))
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
+                        print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
                         if (test_acc > 0.9936):
                             print('Training ends because accuracy is high')
                             with open(parent_dir+'weights/'+ 'quanfp' + str(q_bits) +'.pkl','wb') as f:
