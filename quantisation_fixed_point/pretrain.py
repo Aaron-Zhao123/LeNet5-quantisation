@@ -246,7 +246,7 @@ if (MASK_GEN == True):
             'bconv2':   b_conv2.eval(),
             'bfc1':     b_fc1.eval(),
             'bfc2':     b_fc2.eval()
-    ))
+    }))
 
 if (Test == False):
     with open('weights.pkl','wb') as f:
