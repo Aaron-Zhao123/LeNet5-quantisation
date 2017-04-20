@@ -82,16 +82,16 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     for key in keys:
         for i in range(dynamic_range):
             if (i == 0):
-                w_pos = tf.cast(weights[key] >= interval, dtype=tf.float32)
-                b_pos = tf.cast(biases[key] >= interval, dtype=tf.float32)
+                w_pos = tf.cast(tf.abs(weights[key]) >= interval, dtype=tf.float32)
+                b_pos = tf.cast(tf.abs(biases[key]) >= interval, dtype=tf.float32)
                 w_val = weights[key] * w_pos
                 b_val = biases[key] * b_pos
                 weights_new[key] = tf.floordiv( w_val, interval) * interval
                 biases_new[key] = tf.floordiv( b_val, interval) * interval
             else:
                 interval_dr = interval / (float) (i*2)
-                w_pos = tf.logical_and((weights[key] < interval_dr*2), (weights[key] >= interval_dr))
-                b_pos = tf.logical_and((biases[key] < interval_dr*2), (biases[key] >= interval_dr))
+                w_pos = tf.logical_and((tf.abs(weights[key]) < (interval_dr*2)), (tf.abs(weights[key]) >= interval_dr))
+                b_pos = tf.logical_and((tf.abs(biases[key]) < (interval_dr*2)), (tf.abs(biases[key]) >= interval_dr))
                 w_pos = tf.cast(w_pos, dtype=tf.float32)
                 b_pos = tf.cast(b_pos, dtype=tf.float32)
                 w_val = weights[key] * w_pos
@@ -256,6 +256,7 @@ def main(argv = None):
             print(weights['fc1'].eval())
             print(70*'-')
             print('Training starts ...')
+            # sys.exit()
 
             for epoch in range(training_epochs):
                 avg_cost = 0.
