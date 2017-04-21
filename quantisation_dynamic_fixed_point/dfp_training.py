@@ -256,7 +256,6 @@ def main(argv = None):
             print(weights['fc1'].eval())
             print(70*'-')
             print('Training starts ...')
-            # sys.exit()
 
             for epoch in range(training_epochs):
                 avg_cost = 0.
