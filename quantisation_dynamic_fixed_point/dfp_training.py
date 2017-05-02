@@ -211,7 +211,13 @@ def main(argv = None):
         # obtain all weight masks
         mask_dir = parent_dir + 'masks/' + base_name + '.pkl'
         with open(mask_dir,'rb') as f:
-            weights_mask,biases_mask = pickle.load(f)
+            weights_mask = pickle.load(f)
+        biases_mask = {
+            'cov1': np.ones([20]),
+            'cov2': np.ones([50]),
+            'fc1': np.ones([500]),
+            'fc2': np.ones([10])
+        }
 
         mnist = input_data.read_data_sets("MNIST.data/", one_hot = True)
         # tf Graph input
