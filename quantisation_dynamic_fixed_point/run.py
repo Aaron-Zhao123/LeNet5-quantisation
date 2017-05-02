@@ -28,5 +28,5 @@ for q_width in quantisation_bits:
 print(pre_train_acc_list)
 print(test_acc_list)
 with open('acc.txt','wb') as f:
-    f.write(" ".join(pre_train_acc_list))
-    f.write(" ".join(test_acc_list))
+    f.write(pre_train_acc_list)
+    f.write(test_acc_list)
