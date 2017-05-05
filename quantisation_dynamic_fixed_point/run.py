@@ -9,16 +9,17 @@ pfc2 = 0
 base_name = 'base'
 learning_rate = 1e-5
 quantisation_bits = [2,4,8,16,32,64]
+dynamic_width = [2,4,8,16,32,64]
 # quantisation_bits = [32]
 pre_train_acc_list = []
 test_acc_list = []
-for q_width in quantisation_bits:
+for d_width in dynamic_width:
     # set Parameters
     param = [
-    ('-quantisation_bits', q_width),
+    ('-quantisation_bits', 4),
     ('-parent_dir', './'),
     ('-base_name', base_name),
-    ('-d_range', 4)
+    ('-d_range', d_width)
     ]
     (pre_acc, test_acc) = dfp_training.main(param)
     print('pre train acc is {}, after train acc is {}'.format(pre_acc, test_acc))
