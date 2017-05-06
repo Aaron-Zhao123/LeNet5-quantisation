@@ -229,9 +229,9 @@ def main(argv = None):
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
         weights, biases = initialize_variables(weights_dir)
-        weights,biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
+        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
         # Construct model
-        pred, pool = conv_network(x_image, weights, biases)
+        pred, pool = conv_network(x_image, new_weights, new_biases)
 
         # Define loss and optimizer
         trainer = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -243,7 +243,7 @@ def main(argv = None):
         org_grads = trainer.compute_gradients(cost)
 
         org_grads = [(ClipIfNotNone(grad), var) for grad, var in org_grads]
-        new_grads = mask_gradients(org_grads, weights_mask, weights, biases_mask, biases)
+        new_grads = mask_gradients(org_grads, weights_mask, new_weights, biases_mask, new_biases)
         train_step = trainer.apply_gradients(new_grads)
         init = tf.initialize_all_variables()
 
@@ -260,6 +260,7 @@ def main(argv = None):
             print("Directly before pruning, Test Accuracy:", pre_train_acc)
             print(70*'-')
             print(weights['fc1'].eval())
+            print(new_weights['fc1'].eval())
             print(70*'-')
             print('Training starts ...')
 
