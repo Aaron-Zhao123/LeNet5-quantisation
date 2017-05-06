@@ -77,8 +77,8 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
     frac_range = 2 ** frac_bits - 1
-    max_range = 0.5 ** (-frac_bits) * frac_range
-    interval =  0.5 ** (-frac_bits)
+    max_range = 0.5 ** (frac_bits) * frac_range
+    interval =  0.5 ** (frac_bits)
     print(interval)
     print(max_range)
     sys.exit()
