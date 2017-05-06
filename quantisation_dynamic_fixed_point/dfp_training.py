@@ -263,6 +263,7 @@ def main(argv = None):
             print(new_weights['fc1'].eval())
             print(70*'-')
             print('Training starts ...')
+            return (pre_train_acc,0)
 
             for epoch in range(training_epochs):
                 avg_cost = 0.
