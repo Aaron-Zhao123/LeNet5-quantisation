@@ -92,9 +92,8 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
                 weights_new[key] = tf.floordiv( w_val, interval) * interval
                 biases_new[key] = tf.floordiv( b_val, interval) * interval
             elif (i == dynamic_range - 1):
-                interval_dr = interval / (float) (i*2)
+                interval_dr = 0.5 ** (frac_bits + i)
                 max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i))
-                next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
                 w_pos =tf.abs(weights[key]) <= max_range
                 b_pos =tf.abs(biases[key]) <= max_range
                 w_pos = tf.cast(w_pos, dtype=tf.float32)
@@ -104,7 +103,7 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
                 weights_new[key] += tf.floordiv(w_val, interval_dr) * interval_dr
                 biases_new[key] += tf.floordiv(b_val, interval_dr) * interval_dr
             else:
-                interval_dr = interval / (float) (i*2)
+                interval_dr = 0.5 ** (frac_bits + i)
                 max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i))
                 next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
                 w_pos = tf.logical_and((tf.abs(weights[key]) <= (max_range)), (tf.abs(weights[key]) > next_max_range))
