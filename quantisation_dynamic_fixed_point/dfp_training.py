@@ -76,22 +76,27 @@ def initialize_variables(weights_file_name):
 def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
-    interval = 0.5 / float(frac_bits)
+    frac_range = 2 ** frac_bits - 1
+    max_range = 0.5 ** (-frac_bits) * frac_range
+    interval =  0.5 ** (-frac_bits)
     weights_new = {}
     biases_new = {}
     for key in keys:
         for i in range(dynamic_range):
             if (i == 0):
-                w_pos = tf.cast(tf.abs(weights[key]) >= interval, dtype=tf.float32)
-                b_pos = tf.cast(tf.abs(biases[key]) >= interval, dtype=tf.float32)
+                next_max_range = max_range * 0.5
+                w_pos = tf.cast(tf.abs(weights[key]) > next_max_range, dtype=tf.float32)
+                b_pos = tf.cast(tf.abs(biases[key]) > next_max_range, dtype=tf.float32)
                 w_val = weights[key] * w_pos
                 b_val = biases[key] * b_pos
                 weights_new[key] = tf.floordiv( w_val, interval) * interval
                 biases_new[key] = tf.floordiv( b_val, interval) * interval
             else:
                 interval_dr = interval / (float) (i*2)
-                w_pos = tf.logical_and((tf.abs(weights[key]) < (interval_dr*2)), (tf.abs(weights[key]) >= interval_dr))
-                b_pos = tf.logical_and((tf.abs(biases[key]) < (interval_dr*2)), (tf.abs(biases[key]) >= interval_dr))
+                max_range = max_range * 0.5 ** (i)
+                next_max_range = max_range *  0.5 ** (i + 1)
+                w_pos = tf.logical_and((tf.abs(weights[key]) <= (max_range)), (tf.abs(weights[key]) > next_max_range))
+                b_pos = tf.logical_and((tf.abs(biases[key]) <= (max_range)), (tf.abs(biases[key]) > next_max_range))
                 w_pos = tf.cast(w_pos, dtype=tf.float32)
                 b_pos = tf.cast(b_pos, dtype=tf.float32)
                 w_val = weights[key] * w_pos
