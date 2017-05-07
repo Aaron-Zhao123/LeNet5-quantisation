@@ -1,5 +1,8 @@
 import os
 import cdfp_training
+import pickle
+import numpy as np
+
 acc_list = []
 count = 0
 pcov = 0
@@ -12,18 +15,26 @@ quantisation_bits = [2,4,8,16,32,64]
 # quantisation_bits = [32]
 pre_train_acc_list = []
 test_acc_list = []
-c_pos = {
-'cov1': 0.,
-'cov2': 0.,
-'fc1': 0.,
-'fc2': 0.
+with open('weights/base.pkl', 'rb') as f:
+    wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
+weights_val = {
+    'cov1': wc1,
+    'cov2': wc2,
+    'fc1': wd1,
+    'fc2': out
 }
-c_neg = {
-'cov1': 0.,
-'cov2': 0.,
-'fc1': 0.,
-'fc2': 0.
-}
+
+keys = ['cov1', 'cov2', 'fc1', 'fc2']
+central_value = {}
+c_pos = {}
+c_neg = {}
+
+for key in keys:
+    central_value[key] = np.mean(weights[key])
+    c_pos[key] = np.mean(weights[key][weights[key] > central_value[key]])
+    c_neg[key] = np.mean(weights[key][weights[key] <= central_value[key]])
+
+
 
 for q_width in quantisation_bits:
     # set Parameters
