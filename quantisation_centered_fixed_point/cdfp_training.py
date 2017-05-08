@@ -89,7 +89,9 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
         for i in range(dynamic_range):
             if (i == 0):
                 next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
-                weight_regulate = upper_part_pos * (weights[key] - tf.cast(c_pos[key], dtype = tf.float32)) + lower_part_pos * (weights[key] - tf.cast(c_neg[key], dtype = tf.float32))
+
+                print(c_pos)
+                weight_regulate = upper_part_pos * (weights[key] - c_pos[key]) + lower_part_pos * (weights[key] - c_neg[key])
 
                 w_pos = tf.cast(tf.abs(weight_regulate) > next_max_range, dtype=tf.float32)
                 b_pos = tf.cast(tf.abs(biases[key]) > next_max_range, dtype=tf.float32)
