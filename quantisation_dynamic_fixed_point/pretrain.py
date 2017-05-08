@@ -65,13 +65,13 @@ def initialize_variables():
 
     weights = {
         # 5x5 conv, 1 input, 32 outputs
-        'cov1': tf.Variable(wc1 * weights_mask['cov1']),
+        'cov1': tf.Variable(wc1),
         # 5x5 conv, 32 inputs, 64 outputs
-        'cov2': tf.Variable(wc2 * weights_mask['cov2']),
+        'cov2': tf.Variable(wc2),
         # fully connected, 7*7*64 inputs, 1024 outputs
-        'fc1': tf.Variable(wd1 * weights_mask['fc1']),
+        'fc1': tf.Variable(wd1),
         # 1024 inputs, 10 outputs (class prediction)
-        'fc2': tf.Variable(out * weights_mask['fc2'])
+        'fc2': tf.Variable(out)
     }
 
     biases = {
@@ -81,7 +81,7 @@ def initialize_variables():
         'fc2': tf.Variable(bout)
     }
 
-    return (weights, biases)
+    return (weights, biases, weights_mask)
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1)
   return tf.Variable(initial)
@@ -103,7 +103,11 @@ def calculate_non_zero_weights(weight):
     return (count,size)
 
 if (Test):
-    weights,biases = initialize_variables()
+    weights_tmp, biases, weights_mask= initialize_variables()
+    keys = ['cov1', 'cov2', 'fc1', 'fc2']
+    weights = {}
+    for key in keys:
+      weights[key] = weights_tmp[key] * weights_mask[key]
 x = tf.placeholder(tf.float32, shape=[None, 784])
 y_ = tf.placeholder(tf.float32, shape=[None, 10])
 if (Test):
