@@ -30,9 +30,9 @@ c_pos = {}
 c_neg = {}
 
 for key in keys:
-    central_value[key] = np.mean(weights[key])
-    c_pos[key] = np.mean(weights[key][weights[key] > central_value[key]])
-    c_neg[key] = np.mean(weights[key][weights[key] <= central_value[key]])
+    central_value[key] = np.mean(weights_val[key])
+    c_pos[key] = np.mean(weights[key][weights_val[key] > central_value[key]])
+    c_neg[key] = np.mean(weights[key][weights_val[key] <= central_value[key]])
 
 
 
