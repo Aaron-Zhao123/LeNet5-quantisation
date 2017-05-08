@@ -73,7 +73,7 @@ def initialize_variables(weights_file_name):
     }
     return (weights, biases)
 
-def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_neg):
+def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_neg, central_value):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
     frac_range = 2 ** frac_bits - 1
@@ -82,8 +82,8 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
     weights_new = {}
     biases_new = {}
     for key in keys:
-        upper_part_pos = weights[key] > 0.
-        lower_part_pos = weights[key] <= 0.
+        upper_part_pos = weights[key] > central_value[key]
+        lower_part_pos = weights[key] <= central_value[key]
         for i in range(dynamic_range):
             if (i == 0):
                 next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
@@ -228,6 +228,8 @@ def main(argv = None):
                     c_pos = val
                 if (item == '-c_neg'):
                     c_neg = val
+                if (item == '-central_value'):
+                    central_value = val
         except getopt.error, msg:
             raise Usage(msg)
 
@@ -252,7 +254,7 @@ def main(argv = None):
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
         weights, biases = initialize_variables(weights_dir)
-        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
+        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range, c_pos, c_neg, central_value)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
 
