@@ -83,7 +83,9 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
     biases_new = {}
     for key in keys:
         upper_part_pos = weights[key] > central_value[key]
+        upper_part_pos = tf.cast(upper_part_pos, dtype = tf.float32)
         lower_part_pos = weights[key] <= central_value[key]
+        lower_part_pos = tf.cast(lower_part_pos, dtype = tf.float32)
         for i in range(dynamic_range):
             if (i == 0):
                 next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
