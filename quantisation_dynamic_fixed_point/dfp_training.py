@@ -182,17 +182,17 @@ def mask_gradients(grads_and_names, weight_masks, weights, biases_masks, biases)
         # flag set if found a match
         flag = 0
         index = 0
-        for key in keys:
-            if (weights[key]== var_name):
-                # print(key, weights[key].name, var_name)
-                mask = weight_masks[key]
-                new_grads.append((tf.multiply(tf.constant(mask, dtype = tf.float32),grad),var_name))
-                flag = 1
-            if (biases[key]== var_name):
-                # print(key, weights[key].name, var_name)
-                mask = biases_masks[key]
-                new_grads.append((tf.multiply(tf.constant(mask, dtype = tf.float32),grad),var_name))
-                flag = 1
+        # for key in keys:
+        #     if (weights[key]== var_name):
+        #         # print(key, weights[key].name, var_name)
+        #         mask = weight_masks[key]
+        #         new_grads.append((tf.multiply(tf.constant(mask, dtype = tf.float32),grad),var_name))
+        #         flag = 1
+        #     if (biases[key]== var_name):
+        #         # print(key, weights[key].name, var_name)
+        #         mask = biases_masks[key]
+        #         new_grads.append((tf.multiply(tf.constant(mask, dtype = tf.float32),grad),var_name))
+        #         flag = 1
         # if flag is not set
         if (flag == 0):
             new_grads.append((grad,var_name))
@@ -244,7 +244,12 @@ def main(argv = None):
         x_image = tf.reshape(x,[-1,28,28,1])
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
-        weights, biases = initialize_variables(weights_dir)
+        weights_tmp, biases = initialize_variables(weights_dir)
+        weights = {}
+
+        for key in keys:
+            weights[key] = weights[key] * weights_mask[key]
+            
         new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
