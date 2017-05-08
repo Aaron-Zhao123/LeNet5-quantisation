@@ -260,7 +260,7 @@ def main(argv = None):
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
         weights_tmp, biases = initialize_variables(weights_dir)
         weights = {}
-        with key in keys:
+        for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
 
         new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range, c_pos, c_neg, central_value)
