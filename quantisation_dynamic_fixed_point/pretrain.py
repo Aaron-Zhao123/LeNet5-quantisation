@@ -14,6 +14,7 @@ np.set_printoptions(precision=128)
 # open_file_name = 'weights/quanfp.pkl'
 # open_file_name = '/Users/aaron/Projects/Mphil_project/tmp_LeNet5_quantisation_FP/weights/quanfp8.pkl'
 open_file_name = './weights/base.pkl'
+open_mask_name = './masks/base.pkl'
 Test = True;
 # Test = False;
 MASK_GEN = True
@@ -59,15 +60,18 @@ def mask_gen():
 def initialize_variables():
     with open(open_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
+    with open(open_mask_name, 'rb') as f:
+      weights_mask = pickle.load(f)
+
     weights = {
         # 5x5 conv, 1 input, 32 outputs
-        'cov1': tf.Variable(wc1),
+        'cov1': tf.Variable(wc1 * weights_mask['cov1']),
         # 5x5 conv, 32 inputs, 64 outputs
-        'cov2': tf.Variable(wc2),
+        'cov2': tf.Variable(wc2 * weights_mask['cov2']),
         # fully connected, 7*7*64 inputs, 1024 outputs
-        'fc1': tf.Variable(wd1),
+        'fc1': tf.Variable(wd1 * weights_mask['fc1']),
         # 1024 inputs, 10 outputs (class prediction)
-        'fc2': tf.Variable(out)
+        'fc2': tf.Variable(out * weights_mask['fc2'])
     }
 
     biases = {
@@ -76,6 +80,7 @@ def initialize_variables():
         'fc1': tf.Variable(bd1),
         'fc2': tf.Variable(bout)
     }
+
     return (weights, biases)
 def weight_variable(shape):
   initial = tf.truncated_normal(shape, stddev=0.1)
