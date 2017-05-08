@@ -96,8 +96,10 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
                 b_pos = tf.cast(tf.abs(biases[key]) > next_max_range, dtype=tf.float32)
                 w_val = weights[key] * w_pos
                 b_val = biases[key] * b_pos
-                tmp =  w_pos * (c_pos * upper_part_pos + c_neg * lower_part_pos)
-                weights_new[key] = tf.floordiv( w_val, interval) * interval
+
+                offsets =  w_pos * (c_pos[key] * upper_part_pos + c_pos[key] * lower_part_pos)
+
+                weights_new[key] = tf.floordiv( w_val, interval) * interval + offsets
                 biases_new[key] = tf.floordiv( b_val, interval) * interval
             elif (i == dynamic_range - 1):
                 interval_dr = 0.5 ** (frac_bits + i)
