@@ -61,7 +61,7 @@ def initialize_variables():
     with open(open_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
     with open(open_mask_name, 'rb') as f:
-      weights_mask = pickle.load(f)
+      (weights_mask,biase_mask) = pickle.load(f)
 
     weights = {
         # 5x5 conv, 1 input, 32 outputs
