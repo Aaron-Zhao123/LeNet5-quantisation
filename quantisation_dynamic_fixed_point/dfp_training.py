@@ -248,8 +248,8 @@ def main(argv = None):
         weights = {}
 
         for key in keys:
-            weights[key] = weights[key] * weights_mask[key]
-            
+            weights[key] = weights_tmp[key] * weights_mask[key]
+
         new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
