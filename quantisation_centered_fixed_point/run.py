@@ -46,7 +46,7 @@ for q_width in quantisation_bits:
     ('-c_pos', c_pos),
     ('-c_neg', c_neg),
     ]
-    (pre_acc, test_acc) = dfp_training.main(param)
+    (pre_acc, test_acc) = cdfp_training.main(param)
     print('pre train acc is {}, after train acc is {}'.format(pre_acc, test_acc))
     pre_train_acc_list.append(pre_acc)
     test_acc_list.append(test_acc)
