@@ -82,10 +82,11 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
     weights_new = {}
     biases_new = {}
     for key in keys:
-        upper_part_pos = weights[key] > central_value[key]
+        upper_part_pos = tf.logical_and(weights[key] > central_value[key], weights[key] != 0.)
         upper_part_pos = tf.cast(upper_part_pos, dtype = tf.float32)
-        lower_part_pos = weights[key] <= central_value[key]
+        lower_part_pos = tf.logical_and(weights[key] <= central_value[key], weights[key] != 0.)
         lower_part_pos = tf.cast(lower_part_pos, dtype = tf.float32)
+        zero_part_pos = tf.cast(weights[key] == 0., dtype = tf.float32)
         for i in range(dynamic_range):
             if (i == 0):
                 next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
@@ -201,13 +202,6 @@ def mask_gradients(grads_and_names, weight_masks, weights, biases_masks, biases)
         # flag set if found a match
         flag = 0
         index = 0
-        for key in keys:
-            if (weights[key]== var_name):
-                # print(key, weights[key].name, var_name)
-                mask = weight_masks[key]
-                new_grads.append((tf.multiply(tf.constant(mask, dtype = tf.float32),grad),var_name))
-                flag = 1
-        # if flag is not set
         if (flag == 0):
             new_grads.append((grad,var_name))
     return new_grads
@@ -264,7 +258,11 @@ def main(argv = None):
         x_image = tf.reshape(x,[-1,28,28,1])
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
-        weights, biases = initialize_variables(weights_dir)
+        weights_tmp, biases = initialize_variables(weights_dir)
+        weights = {}
+        with key in keys:
+            weights[key] = weights_tmp[key] * weights_mask[key]
+
         new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range, c_pos, c_neg, central_value)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
