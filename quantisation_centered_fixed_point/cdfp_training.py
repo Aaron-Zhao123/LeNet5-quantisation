@@ -293,7 +293,7 @@ def main(argv = None):
             pre_train_acc = accuracy.eval({x:mnist.test.images, y: mnist.test.labels})
             print("Directly before pruning, Test Accuracy:", pre_train_acc)
             print(70*'-')
-            print(weights['fc1'].eval())
+            print(new_weights['fc1'].eval())
             print(70*'-')
             print('Training starts ...')
             return (pre_train_acc,0)
