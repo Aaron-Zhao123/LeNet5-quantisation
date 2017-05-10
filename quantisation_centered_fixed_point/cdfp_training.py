@@ -127,7 +127,7 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
                 b_pos = tf.logical_and((tf.abs(biases[key]) <= (max_range)), (tf.abs(biases[key]) > next_max_range))
                 w_pos = tf.cast(w_pos, dtype=tf.float32)
                 b_pos = tf.cast(b_pos, dtype=tf.float32)
-                w_val = weight_regulate[key] * w_pos
+                w_val = weight_regulate * w_pos
                 b_val = biases[key] * b_pos
 
                 offsets =  w_pos * (c_pos[key] * upper_part_pos + c_pos[key] * lower_part_pos)
