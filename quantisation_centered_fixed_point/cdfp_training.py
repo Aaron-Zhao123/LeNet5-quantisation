@@ -87,6 +87,8 @@ def compute_weights_nbits(weights, weights_mask, biases, frac_bits, dynamic_rang
         lower_part_pos = tf.logical_and(weights[key] <= central_value[key], weights_mask[key])
         lower_part_pos = tf.cast(lower_part_pos, dtype = tf.float32)
         zero_part_pos = tf.cast(weights[key] == 0., dtype = tf.float32)
+        if (key == 'cov1'):
+            print(upper_part_pos)
         for i in range(dynamic_range):
             if (i == 0):
                 next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
