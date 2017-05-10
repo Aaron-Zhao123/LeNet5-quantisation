@@ -73,7 +73,7 @@ def initialize_variables(weights_file_name):
     }
     return (weights, biases)
 
-def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_neg, central_value):
+def compute_weights_nbits(weights, weights_mask, biases, frac_bits, dynamic_range, c_pos, c_neg, central_value):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
     frac_range = 2 ** frac_bits - 1
@@ -82,9 +82,9 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range, c_pos, c_ne
     weights_new = {}
     biases_new = {}
     for key in keys:
-        upper_part_pos = tf.logical_and(weights[key] > central_value[key], weights[key] != 0.)
+        upper_part_pos = tf.logical_and(weights[key] > central_value[key], weights_mask[key])
         upper_part_pos = tf.cast(upper_part_pos, dtype = tf.float32)
-        lower_part_pos = tf.logical_and(weights[key] <= central_value[key], weights[key] != 0.)
+        lower_part_pos = tf.logical_and(weights[key] <= central_value[key], weights_mask[key])
         lower_part_pos = tf.cast(lower_part_pos, dtype = tf.float32)
         zero_part_pos = tf.cast(weights[key] == 0., dtype = tf.float32)
         for i in range(dynamic_range):
@@ -263,7 +263,7 @@ def main(argv = None):
         for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
 
-        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range, c_pos, c_neg, central_value)
+        new_weights, new_biases = compute_weights_nbits(weights, weights_mask, biases, q_bits, dynamic_range, c_pos, c_neg, central_value)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
 
