@@ -297,8 +297,8 @@ def main(argv = None):
             print(new_weights['cov1'].eval())
             print(70*'-')
             print('Training starts ...')
-            sys.exit()
-            return (pre_train_acc,0)
+            # sys.exit()
+            # return (pre_train_acc,0)
 
             for epoch in range(training_epochs):
                 avg_cost = 0.
