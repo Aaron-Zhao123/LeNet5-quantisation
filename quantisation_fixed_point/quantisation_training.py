@@ -311,7 +311,7 @@ def main(argv = None):
                         elif (q_bits == 4):
                             threshold = 0.99
                         elif (q_bits == 8):
-                            threshold = 0.993
+                            threshold = 0.9936
                         elif (q_bits == 16):
                             threshold = 0.9936
                         elif (q_bits == 32):
