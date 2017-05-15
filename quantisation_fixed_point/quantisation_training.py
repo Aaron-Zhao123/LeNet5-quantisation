@@ -302,6 +302,7 @@ def main(argv = None):
                     if (i % 1000 == 0):
                         print('cost and acc:',c,accuracy_mean)
                     if (accuracy_mean > 0.99):
+                        accuracy_list = np.zeros(20)
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
