@@ -307,15 +307,13 @@ def main(argv = None):
                                                     y: mnist.test.labels})
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
                         if (q_bits == 2):
-                            threshold = 0.9
+                            threshold = 0.95
                         elif (q_bits == 4):
-                            threshold = 0.99
+                            threshold = 0.991
                         elif (q_bits == 8):
                             threshold = 0.9936
                         elif (q_bits == 16):
                             threshold = 0.9936
-                        elif (q_bits == 32):
-                            threshold = 0.992
 
                         if (test_acc > threshold):
                             print('Training ends because accuracy is high')
