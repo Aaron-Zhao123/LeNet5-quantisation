@@ -67,7 +67,7 @@ def initialize_variables(weights_file_name):
             print("testing wegihts {}, max is {}, min is {}".format(key,
                                                                     np.max(value),
                                                                     np.min(value)))
-        for key, value in biases_val.iteritems():
+        for key, value in biase_val.iteritems():
             print("testing biases {}, max is {}, min is {}".format(key,
                                                                     np.max(value),
                                                                     np.min(value)))
