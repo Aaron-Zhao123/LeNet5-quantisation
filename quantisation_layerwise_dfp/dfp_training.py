@@ -57,19 +57,17 @@ def initialize_variables(weights_file_name):
         'fc1': bd1,
         'fc2': bout
     }
-    weights = weights_val
-    biases = biase_val
     weights = {
-        'cov1': tf.Variable(weights['cov1']),
-        'cov2': tf.Variable(weights['cov2']),
-        'fc1': tf.Variable(weights['fc1']),
-        'fc2': tf.Variable(weights['fc2'])
+        'cov1': tf.Variable(weights_val['cov1']),
+        'cov2': tf.Variable(weights_val['cov2']),
+        'fc1': tf.Variable(weights_val['fc1']),
+        'fc2': tf.Variable(weights_val['fc2'])
     }
     biases = {
-        'cov1': tf.Variable(biases['cov1']),
-        'cov2': tf.Variable(biases['cov2']),
-        'fc1': tf.Variable(biases['fc1']),
-        'fc2': tf.Variable(biases['fc2'])
+        'cov1': tf.Variable(biase_val['cov1']),
+        'cov2': tf.Variable(biase_val['cov2']),
+        'fc1': tf.Variable(biase_val['fc1']),
+        'fc2': tf.Variable(biase_val['fc2'])
     }
     print("RANGE TEST: Determine dynamic range")
     print(80*"-")
