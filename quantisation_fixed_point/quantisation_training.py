@@ -330,7 +330,7 @@ def main(argv = None):
                             threshold = 0.991
                         elif (q_bits == 7):
                             threshold = 0.9936
-                        elif (q_bits == 15):
+                        elif (q_bits >= 15):
                             threshold = 0.9936
 
                         if (test_acc > threshold):
