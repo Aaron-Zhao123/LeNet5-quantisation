@@ -73,7 +73,7 @@ def initialize_variables(weights_file_name):
     }
     print("RANGE TEST: Determine dynamic range")
     print(80*"-")
-    dynmaic_range = {}
+    dynamic_range = {}
     for key, value in weights_val.iteritems():
         print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
                                                                         np.sum(np.abs(value)>2)))
