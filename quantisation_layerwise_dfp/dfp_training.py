@@ -85,9 +85,9 @@ def initialize_variables(weights_file_name):
                                                                 np.min(biase_val[key])))
         d_range = find_scaling_factor(value, biase_val[key])
         print("scale for this layer is {}".format(d_range))
-        layerwise_max = max(np.max(value), np.max(biase_val[key]))
-    sys.exit()
-    return (weights, biases)
+        dynamic_range[key] = d_range
+    print("entire scale factor list: {}".format(dynamic_range))
+    return (weights, biases, dynamic_range)
 
 def find_scaling_factor(value, b_value):
     meta = np.concatenate((value.flatten(),b_value.flatten()), axis = 0)
@@ -106,44 +106,14 @@ def find_scaling_factor(value, b_value):
 def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
-    frac_range = 2 ** frac_bits - 1
-    max_range = 0.5 ** (frac_bits) * frac_range
-    interval =  0.5 ** (frac_bits)
+    interval = 0.5 / float(frac_bits)
     weights_new = {}
     biases_new = {}
     for key in keys:
-        for i in range(dynamic_range):
-            if (i == 0):
-                next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
-                w_pos = tf.cast(tf.abs(weights[key]) > next_max_range, dtype=tf.float32)
-                b_pos = tf.cast(tf.abs(biases[key]) > next_max_range, dtype=tf.float32)
-                w_val = weights[key] * w_pos
-                b_val = biases[key] * b_pos
-                weights_new[key] = tf.floordiv( w_val, interval) * interval
-                biases_new[key] = tf.floordiv( b_val, interval) * interval
-            elif (i == dynamic_range - 1):
-                interval_dr = 0.5 ** (frac_bits + i)
-                max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i))
-                w_pos =tf.abs(weights[key]) <= max_range
-                b_pos =tf.abs(biases[key]) <= max_range
-                w_pos = tf.cast(w_pos, dtype=tf.float32)
-                b_pos = tf.cast(b_pos, dtype=tf.float32)
-                w_val = weights[key] * w_pos
-                b_val = biases[key] * b_pos
-                weights_new[key] += tf.floordiv(w_val, interval_dr) * interval_dr
-                biases_new[key] += tf.floordiv(b_val, interval_dr) * interval_dr
-            else:
-                interval_dr = 0.5 ** (frac_bits + i)
-                max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i))
-                next_max_range = (0.5 ** (frac_bits)) * frac_range * (0.5 ** (i+1))
-                w_pos = tf.logical_and((tf.abs(weights[key]) <= (max_range)), (tf.abs(weights[key]) > next_max_range))
-                b_pos = tf.logical_and((tf.abs(biases[key]) <= (max_range)), (tf.abs(biases[key]) > next_max_range))
-                w_pos = tf.cast(w_pos, dtype=tf.float32)
-                b_pos = tf.cast(b_pos, dtype=tf.float32)
-                w_val = weights[key] * w_pos
-                b_val = biases[key] * b_pos
-                weights_new[key] += tf.floordiv(w_val, interval_dr) * interval_dr
-                biases_new[key] += tf.floordiv(b_val, interval_dr) * interval_dr
+        w_val = weights[key] / float(dynamic_range[key])
+        b_val = biases[key] / float(dynamic_range[key])
+        weights_new[key] = tf.floordiv(w_val, interval) * interval * dynamic_range[key]
+        biases_new[key] = tf.floordiv(b_val, interval) * interval * dynamic_range[key]
     return (weights_new, biases_new)
 
 def conv_network(x, weights, biases):
@@ -245,8 +215,6 @@ def main(argv = None):
             for item, val in opts:
                 if (item == '-quantisation_bits'):
                     q_bits = val
-                if (item == '-d_range'):
-                    dynamic_range = val
                 if (item == '-parent_dir'):
                     parent_dir = val
                 if (item == '-base_name'):
@@ -274,7 +242,7 @@ def main(argv = None):
         x_image = tf.reshape(x,[-1,28,28,1])
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
-        weights_tmp, biases = initialize_variables(weights_dir)
+        weights_tmp, biases, dynamic_range = initialize_variables(weights_dir)
         weights = {}
 
         for key in keys:
