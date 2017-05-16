@@ -304,13 +304,9 @@ def main(argv = None):
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
-                        if (q_bits == 1):
-                            threshold = 0.9936
-                        elif (q_bits == 3):
-                            threshold = 0.9936
-                        elif (q_bits == 5):
-                            threshold = 0.9936
-                        elif (q_bits >= 13):
+                        if (q_bits == 2):
+                            threshold = 0.99
+                        elif (q_bits >= 4):
                             threshold = 0.9936
 
                         if (test_acc > threshold):
