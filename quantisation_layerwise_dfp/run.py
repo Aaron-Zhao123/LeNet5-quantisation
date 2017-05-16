@@ -13,7 +13,7 @@ learning_rate = 1e-5
 dynamic_width = [2,4,8,16,32,64]
 dynamic_width = [1,2,4,8,16]
 quantisation_bits = [2,4,6,8,16,32]
-quantisation_bits = [item-1 for item in quantisation_bits]
+quantisation_bits = [item for item in quantisation_bits]
 pre_train_acc_list = []
 test_acc_list = []
 for q_width in quantisation_bits:
