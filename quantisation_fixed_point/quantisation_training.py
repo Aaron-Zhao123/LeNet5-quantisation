@@ -45,7 +45,8 @@ def initialize_variables(weights_file_name):
     with open(weights_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
         # weights, biases = pickle.load(f)
-    TEST_RANGE = True
+    TEST_RANGE = False
+
     weights_val = {
         'cov1': wc1,
         'cov2': wc2,
@@ -144,6 +145,8 @@ def compute_weights_nbits(weights, biases, frac_bits):
     for key in keys:
         weights[key] = tf.floordiv(weights[key], interval) * interval
         biases[key] = tf.floordiv(biases[key], interval) * interval
+        weights[key] = tf.clip_by_value(weights[key], -1., 1.)
+        biases[key] = tf.clip_by_value(biases[key], -1., 1.)
     return (weights, biases)
 
 def conv_network(x, weights, biases):
@@ -321,13 +324,13 @@ def main(argv = None):
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
-                        if (q_bits == 2):
-                            threshold = 0.95
-                        elif (q_bits == 4):
+                        if (q_bits == 1):
+                            threshold = 0.9
+                        elif (q_bits == 3):
                             threshold = 0.991
-                        elif (q_bits == 8):
+                        elif (q_bits == 7):
                             threshold = 0.9936
-                        elif (q_bits == 16):
+                        elif (q_bits == 15):
                             threshold = 0.9936
 
                         if (test_acc > threshold):

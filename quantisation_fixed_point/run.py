@@ -10,7 +10,8 @@ pfc2 = 0
 base_name = 'base'
 learning_rate = 1e-5
 quantisation_bits = [2,4,8,16,32]
-quantisation_bits = [2,4]
+quantisation_bits = [item-1 for item in quantisation_bits]
+# quantisation_bits = [2,4]
 pre_train_acc_list = []
 test_acc_list = []
 for q_width in quantisation_bits:
