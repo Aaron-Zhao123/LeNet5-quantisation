@@ -45,6 +45,7 @@ def initialize_variables(weights_file_name):
     with open(weights_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
         # weights, biases = pickle.load(f)
+    TEST_RANGE = True
     weights_val = {
         'cov1': wc1,
         'cov2': wc2,
@@ -57,6 +58,20 @@ def initialize_variables(weights_file_name):
         'fc1': bd1,
         'fc2': bout
     }
+    if (TEST_RANGE):
+        print("RANGE TEST")
+        print(80*"-")
+        for key, value in weights_val.iteritems():
+            print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
+                                                                            np.sum(np.abs(value)>2)))
+            print("testing wegihts {}, max is {}, min is {}".format(key,
+                                                                    np.max(value),
+                                                                    np.min(value)))
+        for key, value in biases_val.iteritems():
+            print("testing biases {}, max is {}, min is {}".format(key,
+                                                                    np.max(value),
+                                                                    np.min(value)))
+        sys.exit()
     weights = weights_val
     biases = biase_val
     weights = {
