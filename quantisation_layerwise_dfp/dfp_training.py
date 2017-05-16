@@ -243,7 +243,7 @@ def main(argv = None):
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
         (weights_tmp, biases, dynamic_range) = initialize_variables(weights_dir)
         weights = {}
-        print(type(weights_mask)
+        print(type(weights_mask))
         for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
 
