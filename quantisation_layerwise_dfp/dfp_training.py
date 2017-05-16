@@ -73,18 +73,18 @@ def initialize_variables(weights_file_name):
     print("RANGE TEST: Determine dynamic range")
     print(80*"-")
     dynamic_range = {}
-    # for key, value in weights_val.iteritems():
-    #     print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
-    #                                                                     np.sum(np.abs(value)>2)))
-    #     print("testing wegihts {}, max is {}, min is {}".format(key,
-    #                                                             np.max(value),
-    #                                                             np.min(value)))
-    #     print("testing biases {}, max is {}, min is {}".format(key,
-    #                                                             np.max(biase_val[key]),
-    #                                                             np.min(biase_val[key])))
-    #     d_range = find_scaling_factor(value, biase_val[key])
-    #     print("scale for this layer is {}".format(d_range))
-    #     dynamic_range[key] = d_range
+    for key, value in weights_val.iteritems():
+        print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
+                                                                        np.sum(np.abs(value)>2)))
+        print("testing wegihts {}, max is {}, min is {}".format(key,
+                                                                np.max(value),
+                                                                np.min(value)))
+        print("testing biases {}, max is {}, min is {}".format(key,
+                                                                np.max(biase_val[key]),
+                                                                np.min(biase_val[key])))
+        d_range = find_scaling_factor(value, biase_val[key])
+        print("scale for this layer is {}".format(d_range))
+        dynamic_range[key] = d_range
     print("entire scale factor list: {}".format(dynamic_range))
     return (weights, biases, dynamic_range)
 
@@ -243,7 +243,7 @@ def main(argv = None):
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
         (weights_tmp, biases, dynamic_range) = initialize_variables(weights_dir)
         weights = {}
-
+        print(weights_mask)
         for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
 
