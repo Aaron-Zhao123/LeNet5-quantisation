@@ -309,6 +309,8 @@ def main(argv = None):
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
                         if (q_bits == 1):
                             threshold = 0.9
+                        elif (q_bits == 3):
+                            threshold = 0.9936
                         elif (q_bits == 5):
                             threshold = 0.9936
                         elif (q_bits >= 13):
