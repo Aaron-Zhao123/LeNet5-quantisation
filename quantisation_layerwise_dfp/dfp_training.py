@@ -83,7 +83,7 @@ def initialize_variables(weights_file_name):
         print("testing biases {}, max is {}, min is {}".format(key,
                                                                 np.max(biase_val[key]),
                                                                 np.min(biase_val[key])))
-        d_range = find_scaling_factor(value, biase_val)
+        d_range = find_scaling_factor(value, biase_val[key])
         print("scale for this layer is {}".format(d_range))
         layerwise_max = max(np.max(value), np.max(biase_val[key]))
     sys.exit()
