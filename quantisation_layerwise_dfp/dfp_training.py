@@ -242,7 +242,7 @@ def main(argv = None):
         x_image = tf.reshape(x,[-1,28,28,1])
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
-        weights_tmp, biases, dynamic_range = initialize_variables(weights_dir)
+        (weights_tmp, biases, dynamic_range) = initialize_variables(weights_dir)
         weights = {}
 
         for key in keys:
