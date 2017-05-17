@@ -13,6 +13,7 @@ np.set_printoptions(precision=128)
 # open_file_name = 'weights/weight0.pkl'
 # open_file_name = 'weights/quanfp.pkl'
 open_file_name = '/Users/aaron/Projects/Mphil_project/tmp_LeNet5_quantisation_FP/weights/quanfp8.pkl'
+open_file_name = './weights/quanfp8.pkl'
 Test = True;
 TEST_RANGE = True;
 # Test = False;
