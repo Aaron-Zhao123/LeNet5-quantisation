@@ -326,7 +326,8 @@ def main(argv = None):
                                     biases['fc2'].eval(),
                                 ),f)
                             print("saving model ...")
-                            return (pre_train_acc, test_acc)
+                            if (test_acc > threshold):
+                                return (pre_train_acc, test_acc)
                     # Compute average loss
                     avg_cost += c / total_batch
                 # Display logs per epoch step
