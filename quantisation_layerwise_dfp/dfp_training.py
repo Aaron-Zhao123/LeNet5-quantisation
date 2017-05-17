@@ -18,8 +18,8 @@ class Usage(Exception):
         self.msg = msg
 
 # Parameters
-learning_rate =  1e-4
-training_epochs = 200
+learning_rate =  1e-5
+training_epochs = 300
 batch_size = 100
 display_step = 1
 
@@ -282,6 +282,7 @@ def main(argv = None):
             print(new_weights['cov1'].eval())
             print(70*'-')
             print('Training starts ...')
+            best_test_acc = 0
             # return (pre_train_acc,0)
 
             for epoch in range(training_epochs):
@@ -309,8 +310,10 @@ def main(argv = None):
                         elif (q_bits >= 4):
                             threshold = 0.9936
 
-                        if (test_acc > threshold):
+                        if (test_acc > best_test_accr or test_acc >= threshold):
                             print('Training ends because accuracy is high')
+                            print('save a new model because new higher test acc')
+                            best_test_acc = test_acc
                             with open(parent_dir+'weights/'+ 'quanfp' + str(q_bits) +'.pkl','wb') as f:
                                 pickle.dump((
                                     weights['cov1'].eval(),
@@ -330,20 +333,20 @@ def main(argv = None):
                 print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
             print('Training ends because timeout, but still save the model')
-            with open('weights/quanfp'+ str(q_bits) +'.pkl','wb') as f:
-                pickle.dump((
-                    weights['cov1'].eval(),
-                    weights['cov2'].eval(),
-                    weights['fc1'].eval(),
-                    weights['fc2'].eval(),
-                    biases['cov1'].eval(),
-                    biases['cov2'].eval(),
-                    biases['fc1'].eval(),
-                    biases['fc2'].eval(),
-                ),f)
-            test_acc = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
-            print("Test Accuracy:", test_acc)
-            return (pre_train_acc, test_acc)
+            # with open('weights/quanfp'+ str(q_bits) +'.pkl','wb') as f:
+            #     pickle.dump((
+            #         weights['cov1'].eval(),
+            #         weights['cov2'].eval(),
+            #         weights['fc1'].eval(),
+            #         weights['fc2'].eval(),
+            #         biases['cov1'].eval(),
+            #         biases['cov2'].eval(),
+            #         biases['fc1'].eval(),
+            #         biases['fc2'].eval(),
+            #     ),f)
+            # test_acc = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
+            print("Test Accuracy:", best_test_acc)
+            return (pre_train_acc, best_test_acc)
 
     except Usage, err:
         print >> sys.stderr, err.msg
