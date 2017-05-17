@@ -14,6 +14,7 @@ np.set_printoptions(precision=128)
 # open_file_name = 'weights/quanfp.pkl'
 open_file_name = '/Users/aaron/Projects/Mphil_project/tmp_LeNet5_quantisation_FP/weights/quanfp8.pkl'
 Test = True;
+TEST_RANGE = True;
 # Test = False;
 MASK_GEN = True
 # MASK_GEN = False
@@ -97,7 +98,21 @@ def calculate_non_zero_weights(weight):
     return (count,size)
 
 if (Test):
-    weights,biases = initialize_variables()
+    weights, biases = initialize_variables()
+    if (TEST_RANGE):
+        print("RANGE TEST")
+        print(80*"-")
+        for key, value in weights.iteritems():
+            print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
+                                                                            np.sum(np.abs(value)>2)))
+            print("testing wegihts {}, max is {}, min is {}".format(key,
+                                                                    np.max(value),
+                                                                    np.min(value)))
+        for key, value in biases.iteritems():
+            print("testing biases {}, max is {}, min is {}".format(key,
+                                                                    np.max(value),
+                                                                    np.min(value)))
+        sys.exit()
 x = tf.placeholder(tf.float32, shape=[None, 784])
 y_ = tf.placeholder(tf.float32, shape=[None, 10])
 if (Test):
