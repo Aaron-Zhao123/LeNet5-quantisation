@@ -3,6 +3,7 @@ import numpy as np
 import input_data
 import pickle
 import scipy.io as sio
+import sys
 np.set_printoptions(precision=128)
 # open_file_name = 'weights_log/weights10.pkl'
 # open_file_name = 'weights_log/weights_quan'+'.pkl'
@@ -60,6 +61,38 @@ def mask_gen():
 def initialize_variables():
     with open(open_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
+    weights_val = {
+        # 5x5 conv, 1 input, 32 outputs
+        'cov1': wc1,
+        # 5x5 conv, 32 inputs, 64 outputs
+        'cov2': wc2,
+        # fully connected, 7*7*64 inputs, 1024 outputs
+        'fc1': wd1,
+        # 1024 inputs, 10 outputs (class prediction)
+        'fc2': out
+    }
+
+    biases_val = {
+        'cov1': bc1,
+        'cov2': bc2,
+        'fc1': bd1,
+        'fc2': bout
+    }
+    if (TEST_RANGE):
+        print("RANGE TEST")
+        print(80*"-")
+        for key, value in weights_val.iteritems():
+            print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
+                                                                            np.sum(np.abs(value)>2)))
+            print("testing wegihts {}, max is {}, min is {}".format(key,
+                                                                    np.max(value),
+                                                                    np.min(value)))
+        for key, value in biases_val.iteritems():
+            print("testing biases {}, max is {}, min is {}".format(key,
+                                                                    np.max(value),
+                                                                    np.min(value)))
+        sys.exit()
+
     weights = {
         # 5x5 conv, 1 input, 32 outputs
         'cov1': tf.Variable(wc1),
@@ -100,20 +133,7 @@ def calculate_non_zero_weights(weight):
 
 if (Test):
     weights, biases = initialize_variables()
-    if (TEST_RANGE):
-        print("RANGE TEST")
-        print(80*"-")
-        for key, value in weights.iteritems():
-            print('{} weights are above 1, {} weights are above 2'.format(np.sum(np.abs(value)>1),
-                                                                            np.sum(np.abs(value)>2)))
-            print("testing wegihts {}, max is {}, min is {}".format(key,
-                                                                    np.max(value),
-                                                                    np.min(value)))
-        for key, value in biases.iteritems():
-            print("testing biases {}, max is {}, min is {}".format(key,
-                                                                    np.max(value),
-                                                                    np.min(value)))
-        sys.exit()
+
 x = tf.placeholder(tf.float32, shape=[None, 784])
 y_ = tf.placeholder(tf.float32, shape=[None, 10])
 if (Test):
