@@ -17,13 +17,14 @@ quantisation_bits = [6]
 quantisation_bits = [item-3 for item in quantisation_bits]
 pre_train_acc_list = []
 test_acc_list = []
-for q_width in quantisation_bits:
+# for q_width in quantisation_bits:
+for d_width in dynamic_width:
     # set Parameters
     param = [
-    ('-quantisation_bits', q_width),
+    ('-quantisation_bits', 3),
     ('-parent_dir', './'),
     ('-base_name', base_name),
-    ('-d_range', 4)
+    ('-d_range', d_width)
     ]
     (pre_acc, test_acc) = dfp_training.main(param)
     print('pre train acc is {}, after train acc is {}'.format(pre_acc, test_acc))
