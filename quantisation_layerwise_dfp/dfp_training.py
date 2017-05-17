@@ -310,7 +310,7 @@ def main(argv = None):
                         elif (q_bits >= 4):
                             threshold = 0.9936
 
-                        if (test_acc > best_test_accr or test_acc >= threshold):
+                        if (test_acc > best_test_acc or test_acc >= threshold):
                             print('Training ends because accuracy is high')
                             print('save a new model because new higher test acc')
                             best_test_acc = test_acc
