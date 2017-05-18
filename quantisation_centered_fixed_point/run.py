@@ -2,7 +2,6 @@ import os
 import cdfp_training
 import pickle
 import numpy as np
-import pandas as pd
 import sys
 import matplotlib.pyplot as plt
 import pylab
