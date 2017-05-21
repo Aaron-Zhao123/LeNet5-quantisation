@@ -24,7 +24,7 @@ for q_width in quantisation_bits:
     ('-quantisation_bits', q_width),
     ('-parent_dir', './'),
     ('-base_name', base_name),
-    ('-d_range', 4)
+    ('-d_range', 2)
     ]
     (pre_acc, test_acc) = dfp_training.main(param)
     print('pre train acc is {}, after train acc is {}'.format(pre_acc, test_acc))
