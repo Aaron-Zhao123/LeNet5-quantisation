@@ -299,6 +299,7 @@ def main(argv = None):
             print('Training starts ...')
             # sys.exit()
             # return (pre_train_acc,0)
+            test_acc_save = 0
 
             for epoch in range(training_epochs):
                 avg_cost = 0.
@@ -319,7 +320,8 @@ def main(argv = None):
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
-                        if (test_acc > 0.9936):
+                        if (test_acc >= 0.9936 or test_acc > test_acc_save):
+                            test_acc_save = test_acc
                             print('Training ends because accuracy is high')
                             with open(parent_dir+'weights/'+ 'quanfp' + str(q_bits) +'.pkl','wb') as f:
                                 pickle.dump((
@@ -333,7 +335,8 @@ def main(argv = None):
                                     biases['fc2'].eval(),
                                 ),f)
                             print("saving model ...")
-                            return (pre_train_acc, test_acc)
+                            if (test_acc >= 0.9936):
+                                return (pre_train_acc, test_acc)
                     # Compute average loss
                     avg_cost += c / total_batch
                 # Display logs per epoch step
