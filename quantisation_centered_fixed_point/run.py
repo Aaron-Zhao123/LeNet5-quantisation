@@ -67,7 +67,7 @@ for q_width in quantisation_bits:
     ('-quantisation_bits', q_width),
     ('-parent_dir', './'),
     ('-base_name', base_name),
-    ('-d_range', 4),
+    ('-d_range', 2),
     ('-c_pos', c_pos),
     ('-c_neg', c_neg),
     ('-central_value', central_value)
