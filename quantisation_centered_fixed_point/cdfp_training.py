@@ -343,7 +343,7 @@ def main(argv = None):
                 print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
             print('Training ends because timeout, but still save the model')
-            if (TRAIN):
+            if (test_acc != 0):
                 return (pre_train_acc, test_acc_save)
             else:
                 with open('weights/quanfp'+ str(q_bits) +'.pkl','wb') as f:
