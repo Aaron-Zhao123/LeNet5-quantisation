@@ -343,20 +343,23 @@ def main(argv = None):
                 print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(avg_cost))
 
             print('Training ends because timeout, but still save the model')
-            with open('weights/quanfp'+ str(q_bits) +'.pkl','wb') as f:
-                pickle.dump((
-                    new_weights['cov1'].eval(),
-                    new_weights['cov2'].eval(),
-                    new_weights['fc1'].eval(),
-                    new_weights['fc2'].eval(),
-                    biases['cov1'].eval(),
-                    biases['cov2'].eval(),
-                    biases['fc1'].eval(),
-                    biases['fc2'].eval(),
-                ),f)
-            test_acc = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
-            print("Test Accuracy:", test_acc)
-            return (pre_train_acc, test_acc)
+            if (TRAIN):
+                return (pre_train_acc, test_acc_save)
+            else:
+                with open('weights/quanfp'+ str(q_bits) +'.pkl','wb') as f:
+                    pickle.dump((
+                        new_weights['cov1'].eval(),
+                        new_weights['cov2'].eval(),
+                        new_weights['fc1'].eval(),
+                        new_weights['fc2'].eval(),
+                        biases['cov1'].eval(),
+                        biases['cov2'].eval(),
+                        biases['fc1'].eval(),
+                        biases['fc2'].eval(),
+                    ),f)
+                test_acc = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
+                print("Test Accuracy:", test_acc)
+                return (pre_train_acc, test_acc)
 
     except Usage, err:
         print >> sys.stderr, err.msg
