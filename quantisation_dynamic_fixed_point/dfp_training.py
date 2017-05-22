@@ -285,7 +285,7 @@ def main(argv = None):
             print(70*'-')
             print(weights['cov1'].eval())
             print(70*'-')
-            print(new_weights['cov1'].eval())
+            # print(new_weights['cov1'].eval())
             print(70*'-')
             prune_info(weights,0)
             print('Training starts ...')
