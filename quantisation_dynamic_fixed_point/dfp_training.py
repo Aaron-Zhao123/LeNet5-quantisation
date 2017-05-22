@@ -280,6 +280,8 @@ def main(argv = None):
             accuracy_list = np.zeros(20)
 
             pre_train_acc = accuracy.eval({x:mnist.test.images, y: mnist.test.labels})
+
+            return (pre_train_acc, 0)
             print("Directly before quantization, Test Accuracy:", pre_train_acc)
             print(70*'-')
             print(weights['cov1'].eval())
