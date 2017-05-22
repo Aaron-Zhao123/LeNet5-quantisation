@@ -247,12 +247,14 @@ def main(argv = None):
         weights_tmp, biases = initialize_variables(weights_dir)
         weights = {}
 
-        for key in keys:
-            weights[key] = weights_tmp[key] * weights_mask[key]
 
-        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
+        new_weights, new_biases = compute_weights_nbits(weights_tmp, biases, q_bits, dynamic_range)
+
+        for key in keys:
+            weights[key] = new_weights[key] * weights_mask[key]
+
         # Construct model
-        pred, pool = conv_network(x_image, new_weights, new_biases)
+        pred, pool = conv_network(x_image, weights, new_biases)
 
         # Define loss and optimizer
         trainer = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -264,8 +266,8 @@ def main(argv = None):
         org_grads = trainer.compute_gradients(cost)
 
         org_grads = [(ClipIfNotNone(grad), var) for grad, var in org_grads]
-        new_grads = mask_gradients(org_grads, weights_mask, new_weights, biases_mask, new_biases)
-        train_step = trainer.apply_gradients(new_grads)
+        # new_grads = mask_gradients(org_grads, weights_mask, new_weights, biases_mask, new_biases)
+        train_step = trainer.apply_gradients(org_grads)
         init = tf.initialize_all_variables()
 
         # Launch the graph
