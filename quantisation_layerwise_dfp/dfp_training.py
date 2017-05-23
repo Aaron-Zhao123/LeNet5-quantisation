@@ -105,7 +105,7 @@ def find_scaling_factor(value, b_value):
 def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
-    interval = 0.5 / float(frac_bits)
+    interval = 0.5 ** float(frac_bits)
     weights_new = {}
     biases_new = {}
     for key in keys:

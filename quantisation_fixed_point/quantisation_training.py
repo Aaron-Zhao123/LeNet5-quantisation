@@ -141,7 +141,7 @@ def compute_weights_nbits(weights, biases, frac_bits):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
     # 4 bit. 1 bit sign, 1 bit integer, 2 bits fractional 00(0)-11(0.5+0.25)
-    interval = 0.5 / float(frac_bits)
+    interval = 0.5 ** (frac_bits)
     for key in keys:
         weights[key] = tf.floordiv(weights[key], interval) * interval
         biases[key] = tf.floordiv(biases[key], interval) * interval
