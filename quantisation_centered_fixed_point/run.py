@@ -20,9 +20,9 @@ quantisation_bits = [item-5 for item in quantisation_bits]
 pre_train_acc_list = []
 test_acc_list = []
 PLOT = 1
-with open('weights/base.pkl', 'rb') as f:
+with open('weights/base_prune.pkl', 'rb') as f:
     wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
-with open('masks/base.pkl', 'rb') as f:
+with open('masks/base_prune.pkl', 'rb') as f:
     weights_mask = pickle.load(f)
 weights_val = {
     'cov1': wc1,
