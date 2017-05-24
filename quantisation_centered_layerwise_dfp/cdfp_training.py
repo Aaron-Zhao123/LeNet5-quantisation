@@ -110,7 +110,7 @@ def find_scaling_factor(value):
     return scale
 
 
-def compute_weights_nbits(weights, weights_masks, biases, frac_bits, dynamic_range, central_value, c_pos, c_neg):
+def compute_weights_nbits(weights, weights_mask, biases, frac_bits, dynamic_range, central_value, c_pos, c_neg):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
     interval = 0.5 ** float(frac_bits)
