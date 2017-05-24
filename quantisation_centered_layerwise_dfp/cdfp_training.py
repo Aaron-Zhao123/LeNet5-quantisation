@@ -97,7 +97,7 @@ def initialize_variables(weights_file_name, central_value, c_pos, c_neg):
 
 def find_scaling_factor(value):
     # meta = np.concatenate((value.flatten(),b_value.flatten()), axis = 0)
-    meta = vaslue.flatten()
+    meta = value.flatten()
     rmax = 0.01/float(100)
     scale = 0.5
     for i in range(0,10):
