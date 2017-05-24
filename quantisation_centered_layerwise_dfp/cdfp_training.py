@@ -285,7 +285,7 @@ def main(argv = None):
             print(70*'-')
             print('Training starts ...')
             # sys.exit()
-            return (pre_train_acc,0)
+            # return (pre_train_acc,0)
             test_acc_save = 0
 
             for epoch in range(training_epochs):
