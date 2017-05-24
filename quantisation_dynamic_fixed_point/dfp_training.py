@@ -290,7 +290,7 @@ def main(argv = None):
             prune_info(weights,0)
             print('Training starts ...')
             # return (pre_train_acc,0)
-            return (pre_train_acc, 0)
+            # return (pre_train_acc, 0)
             test_acc_save = 0
 
             for epoch in range(training_epochs):
