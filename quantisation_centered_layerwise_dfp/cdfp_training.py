@@ -259,7 +259,7 @@ def main(argv = None):
         for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
 
-        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range, central_value, c_pos, c_neg)
+        new_weights, new_biases = compute_weights_nbits(weights, weights_mask, biases, q_bits, dynamic_range, central_value, c_pos, c_neg)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
 
