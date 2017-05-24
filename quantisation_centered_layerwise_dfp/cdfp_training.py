@@ -90,7 +90,7 @@ def initialize_variables(weights_file_name, central_value, c_pos, c_neg):
 
         d_range_weights = find_scaling_factor(reg_weights)
         d_range_biases = find_scaling_factor(biase_val[key])
-        print("scale for this layer is {}".format(d_range))
+        # print("scale for this layer is {}".format(d_range))
         dynamic_range[key] = [d_range_weights, d_range_biases]
     print("entire scale factor list: {}".format(dynamic_range))
     return (weights, biases, dynamic_range)
