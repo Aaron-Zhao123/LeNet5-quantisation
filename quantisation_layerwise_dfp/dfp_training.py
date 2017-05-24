@@ -305,10 +305,7 @@ def main(argv = None):
                         test_acc = accuracy.eval({  x:mnist.test.images,
                                                     y: mnist.test.labels})
                         print('Try quantize {} frac bits, test accuracy is {}'.format(q_bits, test_acc))
-                        if (q_bits == 2):
-                            threshold = 0.99
-                        elif (q_bits >= 4):
-                            threshold = 0.9936
+                        threshold = 0.9936
 
                         if (test_acc > best_test_acc or test_acc >= threshold):
                             print('Training ends because accuracy is high')
