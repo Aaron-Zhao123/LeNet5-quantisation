@@ -19,7 +19,7 @@ class Usage(Exception):
 
 # Parameters
 learning_rate =  1e-4
-training_epochs = 200
+training_epochs = 300
 batch_size = 100
 display_step = 1
 

@@ -12,6 +12,7 @@ pcov = 0
 pfc = 0
 pcov2 = 0
 pfc2 = 0
+READ_ONLY = True
 base_name = 'base_prune'
 learning_rate = 1e-5
 quantisation_bits = [6,8,16,32]
@@ -70,7 +71,8 @@ for q_width in quantisation_bits:
     ('-d_range', 4),
     ('-c_pos', c_pos),
     ('-c_neg', c_neg),
-    ('-central_value', central_value)
+    ('-central_value', central_value),
+    ('-read_only', READ_ONLY)
     ]
     (pre_acc, test_acc) = cdfp_training.main(param)
     print('pre train acc is {}, after train acc is {}'.format(pre_acc, test_acc))
