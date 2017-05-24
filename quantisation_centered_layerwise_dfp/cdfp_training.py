@@ -110,17 +110,26 @@ def find_scaling_factor(value):
     return scale
 
 
-def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
+def compute_weights_nbits(weights, weights_masks, biases, frac_bits, dynamic_range, central_value, c_pos, c_neg):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
     interval = 0.5 ** float(frac_bits)
     weights_new = {}
     biases_new = {}
     for key in keys:
+        upper_part_pos = tf.logical_and(weights[key] > central_value[key], weights_mask[key])
+        upper_part_pos = tf.cast(upper_part_pos, dtype = tf.float32)
+        lower_part_pos = tf.logical_and(weights[key] <= central_value[key], weights_mask[key])
+        lower_part_pos = tf.cast(lower_part_pos, dtype = tf.float32)
+        zero_part_pos = tf.cast(weights[key] == 0., dtype = tf.float32)
+
+        weight_regulate = upper_part_pos * (weights[key] - c_pos[key]) + lower_part_pos * (weights[key] - c_neg[key])
+        offsets =  w_pos * (c_pos[key] * upper_part_pos + c_neg[key] * lower_part_pos)
+
         [d_w, d_b] = dynamic_range[key]
-        w_val = weights[key] / float(d_w)
+        w_val = weight_regulate / float(d_w)
         b_val = biases[key] / float(d_b)
-        weights_new[key] = tf.floordiv(w_val, interval) * interval * d_w
+        weights_new[key] = tf.floordiv(weight_regulate, interval) * interval * d_w + offsets
         biases_new[key] = tf.floordiv(b_val, interval) * interval * d_b
     return (weights_new, biases_new)
 
@@ -250,7 +259,7 @@ def main(argv = None):
         for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
 
-        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range)
+        new_weights, new_biases = compute_weights_nbits(weights, biases, q_bits, dynamic_range, central_value, c_pos, c_neg)
         # Construct model
         pred, pool = conv_network(x_image, new_weights, new_biases)
 
