@@ -15,6 +15,7 @@ pfc2 = 0
 base_name = 'base_prune'
 learning_rate = 1e-5
 quantisation_bits = [6,8,16,32]
+quantisation_bits = [2,3,4]
 # quantisation_bits = [32]
 pre_train_acc_list = []
 test_acc_list = []

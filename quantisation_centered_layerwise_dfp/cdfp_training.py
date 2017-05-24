@@ -41,12 +41,12 @@ prune_freq = 100
 ENABLE_PRUNING = 0
 
 
-def initialize_variables(weights_file_name):
+def initialize_variables(weights_file_name, central_value, c_pos, c_neg):
     with open(weights_file_name,'rb') as f:
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
         # weights, biases = pickle.load(f)
     weights_val = {
-        'cov1': wc1,
+
         'cov2': wc2,
         'fc1': wd1,
         'fc2': out
@@ -84,14 +84,20 @@ def initialize_variables(weights_file_name):
         print("testing biases {}, max is {}, min is {}".format(key,
                                                                 np.max(biase_val[key]),
                                                                 np.min(biase_val[key])))
-        d_range = find_scaling_factor(value, biase_val[key])
+        reg_plus = value[value > central_value[key]] - c_pos[key]
+        reg_minus = value[value <= central_value[key]] - c_neg[key]
+        reg_weights = np.concatenate((reg_plus.flatten(), reg_minus.flatten()), axis = 0)
+
+        d_range_weights = find_scaling_factor(reg_weights)
+        d_range_biases = find_scaling_factor(biase_val[key])
         print("scale for this layer is {}".format(d_range))
-        dynamic_range[key] = d_range
+        dynamic_range[key] = [d_range_weights, d_range_biases]
     print("entire scale factor list: {}".format(dynamic_range))
     return (weights, biases, dynamic_range)
 
-def find_scaling_factor(value, b_value):
-    meta = np.concatenate((value.flatten(),b_value.flatten()), axis = 0)
+def find_scaling_factor(value):
+    # meta = np.concatenate((value.flatten(),b_value.flatten()), axis = 0)
+    meta = vaslue.flatten()
     rmax = 0.01/float(100)
     scale = 0.5
     for i in range(0,10):
@@ -103,29 +109,7 @@ def find_scaling_factor(value, b_value):
             scale = scale * 0.5
     return scale
 
-# def compute_weights_nbits(weights, weights_mask, biases, frac_bits, dynamic_range, c_pos, c_neg, central_value):
-#     keys = ['cov1','cov2','fc1','fc2']
-#     # two defualt bits: 1 bit sign, 1 bit integer
-#     interval =  0.5 ** (frac_bits)
-#     weights_new = {}
-#     biases_new = {}
-#     for key in keys:
-#         upper_part_pos = tf.logical_and(weights[key] > central_value[key], weights_mask[key])
-#         upper_part_pos = tf.cast(upper_part_pos, dtype = tf.float32)
-#         lower_part_pos = tf.logical_and(weights[key] <= central_value[key], weights_mask[key])
-#         lower_part_pos = tf.cast(lower_part_pos, dtype = tf.float32)
-#         zero_part_pos = tf.cast(weights[key] == 0., dtype = tf.float32)
-#
-#         offsets =  w_pos * (c_pos[key] * upper_part_pos + c_neg[key] * lower_part_pos)
-#
-#         weight_regulate = upper_part_pos * (weights[key] - c_pos[key]) + lower_part_pos * (weights[key] - c_neg[key])
-#
-#         w_val = weight_regulate / float(dynamic_range[key])
-#         b_val = biases[key] / float(dynamic_range[key])
-#         biases_new[key] = tf.floordiv(b_val, interval) * interval * dynamic_range[key]
-#         weights_new[key] = tf.floordiv( w_val, interval) * interval + offsets
-#
-#     return (weights_new, biases_new)
+
 def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     keys = ['cov1','cov2','fc1','fc2']
     # two defualt bits: 1 bit sign, 1 bit integer
@@ -133,10 +117,11 @@ def compute_weights_nbits(weights, biases, frac_bits, dynamic_range):
     weights_new = {}
     biases_new = {}
     for key in keys:
-        w_val = weights[key] / float(dynamic_range[key])
-        b_val = biases[key] / float(dynamic_range[key])
-        weights_new[key] = tf.floordiv(w_val, interval) * interval * dynamic_range[key]
-        biases_new[key] = tf.floordiv(b_val, interval) * interval * dynamic_range[key]
+        [d_w, d_b] = dynamic_range[key]
+        w_val = weights[key] / float(d_w)
+        b_val = biases[key] / float(d_b)
+        weights_new[key] = tf.floordiv(w_val, interval) * interval * d_w
+        biases_new[key] = tf.floordiv(b_val, interval) * interval * d_b
     return (weights_new, biases_new)
 
 def conv_network(x, weights, biases):
@@ -259,7 +244,8 @@ def main(argv = None):
         x_image = tf.reshape(x,[-1,28,28,1])
 
         weights_dir = parent_dir + 'weights/' + base_name + '.pkl'
-        weights_tmp, biases, dynamic_range = initialize_variables(weights_dir)
+        weights_tmp, biases, dynamic_range = initialize_variables(weights_dir,
+            central_value, c_pos, c_neg)
         weights = {}
         for key in keys:
             weights[key] = weights_tmp[key] * weights_mask[key]
