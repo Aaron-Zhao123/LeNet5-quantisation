@@ -46,7 +46,7 @@ def initialize_variables(weights_file_name, central_value, c_pos, c_neg):
         wc1, wc2, wd1, out, bc1, bc2, bd1, bout = pickle.load(f)
         # weights, biases = pickle.load(f)
     weights_val = {
-
+        'cov1': wc1,
         'cov2': wc2,
         'fc1': wd1,
         'fc2': out
