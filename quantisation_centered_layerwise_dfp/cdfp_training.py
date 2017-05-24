@@ -124,7 +124,7 @@ def compute_weights_nbits(weights, weights_mask, biases, frac_bits, dynamic_rang
         zero_part_pos = tf.cast(weights[key] == 0., dtype = tf.float32)
 
         weight_regulate = upper_part_pos * (weights[key] - c_pos[key]) + lower_part_pos * (weights[key] - c_neg[key])
-        offsets =  w_pos * (c_pos[key] * upper_part_pos + c_neg[key] * lower_part_pos)
+        offsets = (c_pos[key] * upper_part_pos + c_neg[key] * lower_part_pos)
 
         [d_w, d_b] = dynamic_range[key]
         w_val = weight_regulate / float(d_w)
